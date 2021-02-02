@@ -17,7 +17,7 @@ env/
 /.python-version
 build/
 develop-eggs/
-dist/
+# dist/ - we're happy committing a few js files
 sdist/
 *.egg-info/
 .installed.cfg

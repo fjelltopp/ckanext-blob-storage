@@ -29,8 +29,8 @@ class ExternalStoragePlugin(plugins.SingletonPlugin):
 
     def get_helpers(self):
         return {'extstorage_server_url': helpers.server_url,
-                # 'extstorage_resource_authz_scope': helpers.resource_authz_scope,
-                # 'extstorage_resource_storage_prefix': helpers.resource_storage_prefix,
+                'extstorage_resource_authz_scope': helpers.resource_authz_scope,
+                'extstorage_resource_storage_prefix': helpers.resource_storage_prefix,
                 'extstorage_storage_namespace': helpers.storage_namespace}
 
     # IBlueprint

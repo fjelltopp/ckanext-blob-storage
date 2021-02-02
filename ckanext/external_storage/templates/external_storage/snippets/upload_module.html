@@ -1,14 +1,18 @@
-{% resource 'external-storage/css/main.3c074c8b.chunk.css' %}
+{% resource 'external-storage/js/upload.js' %}
+{% resource 'external-storage/js/dist/index.js' %}
 
-{% resource 'external-storage/js/runtime-main.c155da57.js' %}
-{% resource 'external-storage/js/2.60dfd475.chunk.js' %}
-{% resource 'external-storage/js/main.c8e9dac3.chunk.js' %}
-
-<div id="ResourceEditor"
-     data-dataset-id="{{ pkg_id }}"
-     data-api="{{ base_url }}"
-     data-lfs="{{ h.extstorage_server_url() }}"
-     data-auth-token="{{ api_key }}"
-     data-organization-id="{{ h.extstorage_storage_namespace() }}"
-     data-resource-id="{{ resource_id }}">
+<div data-module="external-storage-upload"
+     data-module-package-id="{{ pkg_name }}"
+     data-module-server-url="{{ h.extstorage_server_url() }}"
+     data-module-storage-prefix="{{ h.extstorage_resource_storage_prefix(pkg_name) }}"
+     data-module-authz-scope="{{ h.extstorage_resource_authz_scope(pkg_name) }}"
+>
+    {{ parent() }}
+    <div
+        id="upload-progress-bar"
+        class="form-group controls progress progress-striped active"
+        style="display: none"
+    >
+        <div class="progress-bar bar" style="min-width: 2em">0%</div>
+    </div>
 </div>
