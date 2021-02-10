@@ -65,12 +65,6 @@ function App() {
     })
   }
 
-  function uploadProgressPercent() {
-    return Math.round(
-      (uploadProgress.loaded / uploadProgress.total) * 100
-    )
-  }
-
   const inputs = [
     { name: 'url_type', value: 'upload' },
     { name: 'lfs_prefix', value: lfsPrefix },
@@ -79,24 +73,69 @@ function App() {
     { name: 'size', value: hiddenInputs.size }
   ];
 
-  return (
-    <>
-      <input type="file" onChange={e => handleClick(e.target.files)} />
-      {uploadProgress.total != 0 &&
-        <>
-          <p>{uploadProgressPercent()}% uploaded</p>
-          {inputs.map(input =>
+  if (uploadProgress.total == 0) {
+    return (
+      <div className="image-upload">
+        <div className="form-group control-full">
+          <label className="control-label" htmlFor="field-image-upload">File</label>
+          <div className="controls">
             <input
-              key={input.name}
-              name={input.name}
-              value={input.value}
-              type="hidden"
+              id="field-image-upload"
+              type="file"
+              className="form-control"
+              title="Upload a file on your computer"
+              style={{ width: 90 }}
+              onChange={e => handleClick(e.target.files)}
             />
-          )}
-        </>
+            <a className="btn btn-default"><i className="fa fa-cloud-upload"></i>Upload</a>
+          </div>
+        </div>
+      </div>
+    )
+  } else {    
+    const progressBar = () => {
+      const percent = Math.round(
+        (uploadProgress.loaded / uploadProgress.total) * 100
+      );
+      if (percent < 100 || !hiddenInputs.name){
+        return (
+          <div className="form-group controls progress progress-striped active">
+            <div
+              className="progress-bar"
+              style={{ width: `${percent}%` }}
+            >
+              <span>{percent}%</span>
+            </div>
+          </div>
+        )
+      }else{
+        return (
+          <div className="form-group controls progress">
+            <div
+              className="progress-bar progress-bar-success"
+              style={{ width: `${percent}%` }}
+            >
+              <span><i className="fa fa-file"></i>&nbsp;{hiddenInputs.name}</span>
+            </div>
+          </div>
+        )
       }
-    </>
-  );
+    }
+    return (
+      <>
+        {progressBar()}
+        {inputs.map(input =>
+          <input
+            key={input.name}
+            name={input.name}
+            value={input.value || ''}
+            type="hidden"
+          />
+        )}
+      </>
+    );
+  }
+
 
 }
 
