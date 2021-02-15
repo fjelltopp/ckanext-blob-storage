@@ -1,0 +1,4 @@
+FileInputComponentStyles:
+    contents:
+        - FileInputComponent.css
+    output: external_storage/FileInputComponent.css
