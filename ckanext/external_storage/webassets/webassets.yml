@@ -1,4 +1,16 @@
 FileInputComponentStyles:
     contents:
-        - FileInputComponent.css
-    output: external_storage/FileInputComponent.css
+        - css/FileInputComponentStyles.css
+    output: external_storage/FileInputComponentStyles.css
+
+DatapubComponentStyles:
+    contents:
+        - css/main.3c074c8b.chunk.css
+    output: external_storage/DatapubComponentStyles.css
+
+DatapubComponentScripts:
+    contents:
+        - js/runtime-main.c155da57.js
+        - js/2.60dfd475.chunk.js
+        - js/main.c8e9dac3.chunk.js
+    output: external_storage/DatapubComponentScripts.js
