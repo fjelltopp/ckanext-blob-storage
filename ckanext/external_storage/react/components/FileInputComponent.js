@@ -25,9 +25,9 @@ function App({ lfsServer, orgId, datasetId }) {
         console.log(`authz_authorize error: ${error}`);
         setAuthToken('error')
       })
-    return 'Loading...';
+    return ckan.i18n._('Loading');
   } else if (authToken === 'error') {
-    return 'Authentication Error: Failed to load file uploader';
+    return ckan.i18n._('Authentication Error: Failed to load file uploader');
   }
 
   if (uploadProgress.total == 0) {
@@ -91,9 +91,9 @@ function Uploader({ fileUploader }) {
           </div>
           <div className="col-md-6">
             <div className="dropzone">
-              <p>Add a linked resource</p>
+              <p>{ckan.i18n._('Add a linked resource')}</p>
               <button className="btn btn-default" onClick={() => setUploadType('url')}>
-                <span><i className="fa fa-globe"></i> Link Resource</span>
+                <span><i className="fa fa-globe"></i> {ckan.i18n._('Link Resource')}</span>
               </button>
             </div>
           </div>
@@ -104,7 +104,7 @@ function Uploader({ fileUploader }) {
       // replace both options with url upload
       return (
         <div className="form-group control-medium">
-          <label className="control-label" htmlFor="field-url">URL</label>
+          <label className="control-label" htmlFor="field-url">{ckan.i18n._('URL')}</label>
           <div className="controls">
             <input
               id="field-url"
@@ -130,9 +130,9 @@ function FileUploader({ handleFileSelected }) {
   return (
     <div {...getRootProps({ className: 'dropzone' })}>
       <input {...getInputProps()} />
-      <p>Drag a file into this box or</p>
+      <p>{ckan.i18n._('Drag a file into this box or')}</p>
       <p className="btn btn-default">
-        <span><i className="fa fa-cloud-upload"></i>Upload a file</span>
+        <span><i className="fa fa-cloud-upload"></i> {ckan.i18n._('Upload a file')}</span>
       </p>
     </div>
   )
@@ -173,11 +173,14 @@ const
   orgId = requiredString(getAttr('orgId')),
   datasetId = requiredString(getAttr('datasetId'));
 
-ReactDOM.render(
-  <App
-    lfsServer={lfsServer}
-    orgId={orgId}
-    datasetId={datasetId}
-  />,
-  componentElement
-);
+// wait for ckan.i18n to load
+window.addEventListener('load', function () {
+  ReactDOM.render(
+    <App
+      lfsServer={lfsServer}
+      orgId={orgId}
+      datasetId={datasetId}
+    />,
+    componentElement
+  );
+})
