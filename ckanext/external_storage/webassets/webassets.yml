@@ -3,6 +3,12 @@ FileInputComponentStyles:
         - css/FileInputComponentStyles.css
     output: external_storage/FileInputComponentStyles.css
 
+FileInputComponentScripts:
+    contents:
+        - js/frictionless-js.js
+        - js/FileInputComponent.js
+    output: external_storage/FileInputComponent.js
+
 DatapubComponentStyles:
     contents:
         - css/main.3c074c8b.chunk.css

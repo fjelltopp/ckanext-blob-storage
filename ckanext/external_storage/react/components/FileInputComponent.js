@@ -2,7 +2,6 @@ import ReactDOM from 'react-dom';
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone'
 import { Client } from "giftless-client";
-import { open } from "frictionless.js";
 import axios from "axios";
 
 function App({ lfsServer, orgId, datasetId }) {
@@ -34,7 +33,7 @@ function App({ lfsServer, orgId, datasetId }) {
   if (uploadProgress.total == 0) {
     const handleFileSelected = async inputFile => {
       if (!inputFile) return;
-      const file = open(inputFile);
+      const file = data.open(inputFile);
       const client = new Client(lfsServer, authToken, ['basic']);
       await client.upload(file, orgId, datasetId, onProgress);
       setUploadProgress({ loaded: 100, total: 100 });

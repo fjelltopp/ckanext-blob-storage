@@ -302,3 +302,12 @@ To publish a new version to PyPI follow these steps:
 [1]: https://pypi.org/project/pip-tools/
 [giftless]: docker/giftless.yaml
 [nginx]: docker/nginx.conf
+
+
+Developing react components
+---------------------------
+
+- cd into the the react directory
+- run `yarn` to set up your local environment
+- run `yarn start` to start the live builder
+- run `yarn build` to run the builder once
