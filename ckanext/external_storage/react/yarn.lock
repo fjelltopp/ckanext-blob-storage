@@ -1392,10 +1392,9 @@ get-stream@^6.0.0:
   resolved "https://registry.yarnpkg.com/get-stream/-/get-stream-6.0.0.tgz"
   integrity sha512-A1B3Bh1UmL0bidM/YX2NsCOTnGJePL9rO/M+Mw3m9f2gUpfokS0hi5Eah0WSUEWZdZhIZtMjkIYS7mDfOqNHbg==
 
-giftless-client@^0.1.0:
+"giftless-client@git+https://github.com/datopian/giftless-client-js.git":
   version "0.1.0"
-  resolved "https://registry.yarnpkg.com/giftless-client/-/giftless-client-0.1.0.tgz#cf9e480b0025c891d2aeebeb22de87c3afacee86"
-  integrity sha512-pwM4CUykGXmfdWbmoQqOsPvjZ2JhM0IiBmhMY4DhCgSjviIN22mYJHR3kU42lvh5ptLvcLMHWA3hjjvEZcD4ng==
+  resolved "git+https://github.com/datopian/giftless-client-js.git#ce1e6606a36ea8a2debaa523dc752e9248a0b060"
   dependencies:
     axios "^0.21.1"
 
