@@ -86,7 +86,7 @@ setup(
 
         [babel.extractors]
         ckan = ckan.lib.extract:extract_ckan
-        
+
         [paste.paster_command]
         migrate-resources = ckanext.external_storage.cli:MigrateResourcesCommand
     ''',
@@ -98,7 +98,7 @@ setup(
     message_extractors={
         'ckanext': [
             ('**.py', 'python', None),
-            ('**.js', 'javascript', None),
+            ('**/react/components/**.js', 'javascript', None),
             ('**/templates/**.html', 'ckan', None),
         ],
     }

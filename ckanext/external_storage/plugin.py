@@ -8,12 +8,14 @@ from . import actions, authz, helpers
 from .blueprints import blueprint
 from .download_handler import download_handler
 from .interfaces import IResourceDownloadHandler
+from ckan.lib.plugins import DefaultTranslation
 
 
-class ExternalStoragePlugin(plugins.SingletonPlugin):
+class ExternalStoragePlugin(plugins.SingletonPlugin, DefaultTranslation):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.ITemplateHelpers)
     plugins.implements(plugins.IBlueprint)
+    plugins.implements(plugins.ITranslation)
     plugins.implements(plugins.IActions)
     plugins.implements(IAuthorizationBindings)
     plugins.implements(IResourceDownloadHandler, inherit=True)

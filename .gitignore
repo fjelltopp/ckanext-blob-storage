@@ -54,3 +54,6 @@ docs/_build/
 # Development environment extras
 /ckan
 /.env
+
+# Translations
+*.pot
