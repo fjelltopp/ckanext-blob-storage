@@ -6,12 +6,19 @@ import axios from "axios";
 
 function App({ lfsServer, orgId, datasetId }) {
   const [authToken, setAuthToken] = useState();
-  const [uploadProgress, setUploadProgress] = useState({
-    loaded: 0, total: 0
-  });
-  const [hiddenInputs, setHiddenInputs] = useState({
-    sha256: null, name: null, size: null
-  })
+
+  const defaults = {
+    uploadProgress: { loaded: 0, total: 0 },
+    hiddenInputs: { sha256: null, name: null, size: null }
+  }
+  const [uploadProgress, setUploadProgress] =
+    useState(defaults.uploadProgress);
+  const [hiddenInputs, setHiddenInputs] =
+    useState(defaults.hiddenInputs);
+  const resetFileUploader = () => {
+    setUploadProgress(defaults.uploadProgress);
+    setHiddenInputs(defaults.hiddenInputs);
+  }
 
   if (!authToken) {
     // fetch authToken from ckan authz_authorize
@@ -30,7 +37,7 @@ function App({ lfsServer, orgId, datasetId }) {
     return ckan.i18n._('Authentication Error: Failed to load file uploader');
   }
 
-  if (uploadProgress.total == 0) {
+  if (uploadProgress.total === 0) {
     const handleFileSelected = async inputFile => {
       if (!inputFile) return;
       const file = data.open(inputFile);
@@ -49,9 +56,7 @@ function App({ lfsServer, orgId, datasetId }) {
         total: progress.total
       });
     }
-    const fileUploader =
-      <FileUploader handleFileSelected={handleFileSelected} />;
-    return <Uploader fileUploader={fileUploader} />;
+    return <Uploader {...{handleFileSelected}} />;
   }
   const inputs = [
     { name: 'url_type', value: 'upload' },
@@ -63,8 +68,7 @@ function App({ lfsServer, orgId, datasetId }) {
   return (
     <>
       <ProgressBar
-        uploadProgress={uploadProgress}
-        hiddenInputs={hiddenInputs}
+        {...{ uploadProgress, hiddenInputs, resetFileUploader }}
       />
       {inputs.map(input =>
         <input
@@ -79,73 +83,107 @@ function App({ lfsServer, orgId, datasetId }) {
 
 }
 
-function Uploader({ fileUploader }) {
+function Uploader({ handleFileSelected }) {
   const [uploadType, setUploadType] = useState(null);
   switch (uploadType) {
     default: {
-      // split screen between file uploader and url upload
-      return (
-        <div className="row">
-          <div className="col-md-6">
-            {fileUploader}
-          </div>
-          <div className="col-md-6">
-            <div className="dropzone">
-              <p>{ckan.i18n._('Add a linked resource')}</p>
-              <button className="btn btn-default" onClick={() => setUploadType('url')}>
-                <span><i className="fa fa-globe"></i> {ckan.i18n._('Link Resource')}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      );
+      return <FileUploader {...{ handleFileSelected, setUploadType }} />
     }
     case 'url': {
-      // replace both options with url upload
       return (
-        <div className="form-group control-medium">
+        <div>
           <label className="control-label" htmlFor="field-url">{ckan.i18n._('URL')}</label>
-          <div className="controls">
+          <div className="input-group">
             <input
               id="field-url"
               type="url"
               name="url"
               placeholder="http://example.com/my-data.csv"
-              className="form-control" />
+              className="form-control"
+            />
+            <span className="input-group-btn">
+              <button
+                className="btn btn-danger"
+                type="button"
+                onClick={e => { setUploadType(null); e.preventDefault() }}
+              >
+                {ckan.i18n._('Remove')}
+              </button>
+            </span>
           </div>
+          <br />
         </div>
       );
     }
   }
 }
 
-function FileUploader({ handleFileSelected }) {
-  const { getRootProps, getInputProps } = useDropzone({
+function FileUploader({ handleFileSelected, setUploadType }) {
+  const { getRootProps, getInputProps, open } = useDropzone({
     multiple: false,
+    noClick: true,
     onDrop: acceptedFiles =>
       handleFileSelected(acceptedFiles[0]),
     onDropRejected: rejectedFiles =>
       handleFileSelected(rejectedFiles[0].file),
   })
+  const uploadOptions = [
+    {
+      label: ckan.i18n._('Upload a file'),
+      icon: 'fa-cloud-upload',
+      onClick: e => {
+        open(e);
+        e.preventDefault();
+      }
+    },
+    {
+      label: ckan.i18n._('Link'),
+      icon: 'fa-globe',
+      onClick: e => {
+        setUploadType('url');
+        e.preventDefault();
+      }
+    }
+  ]
   return (
     <div {...getRootProps({ className: 'dropzone' })}>
       <input {...getInputProps()} />
       <p>{ckan.i18n._('Drag a file into this box or')}</p>
-      <p className="btn btn-default">
-        <span><i className="fa fa-cloud-upload"></i> {ckan.i18n._('Upload a file')}</span>
-      </p>
+      <div className="btn-group">
+        {uploadOptions.map(option => (
+          <button
+            key={option.label}
+            className="btn btn-default"
+            onClick={option.onClick}
+          >
+            <i className={`fa ${option.icon}`}></i>
+            {option.label}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
 
-function ProgressBar({ uploadProgress, hiddenInputs }) {
+function ProgressBar({ uploadProgress, hiddenInputs, resetFileUploader }) {
   const percent = Math.round(
     (uploadProgress.loaded / uploadProgress.total) * 100
   );
   const loaded = percent === 100 && hiddenInputs.name;
   return (
     <>
-      {loaded && <p><i className="fa fa-file"></i>&nbsp;{hiddenInputs.name}</p>}
+      {loaded &&
+        <h3>
+          <i className="fa fa-file"></i>
+        &nbsp; {hiddenInputs.name} &nbsp;
+        <i
+            className="fa fa-close text-danger"
+            style={{ cursor: 'pointer' }}
+            title={ckan.i18n._('Remove')}
+            onClick={resetFileUploader}
+          ></i>
+        </h3>
+      }
       <div className={`form-group controls progress ${!loaded && 'progress-striped active'}`}>
         <div
           className="progress-bar"
@@ -176,11 +214,7 @@ const
 // wait for ckan.i18n to load
 window.addEventListener('load', function () {
   ReactDOM.render(
-    <App
-      lfsServer={lfsServer}
-      orgId={orgId}
-      datasetId={datasetId}
-    />,
+    <App {...{ lfsServer, orgId, datasetId }} />,
     componentElement
   );
 })
