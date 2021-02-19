@@ -1,4 +1,4 @@
-{% if h.extstorage_use_legacy_file_uploader_ui %}
+{% if h.extstorage_use_scheming_file_uploader() %}
     {{ parent() }}
 {% else %}    
     {% asset 'external_storage/FileInputComponentStyles' %}

@@ -54,6 +54,7 @@ CKAN_CONFIG_VALUES := \
 		solr_url=http://127.0.0.1:8983/solr/ckan \
 		ckanext.external_storage.storage_service_url=http://localhost:9419 \
 		ckanext.external_storage.storage_namespace=my-ckan-ns \
+		ckanext.external_storage.use_scheming_file_uploader=false \
 		ckanext.authz_service.jwt_algorithm=HS256 \
 		ckanext.authz_service.jwt_private_key=this-is-a-test-only-key \
 		ckanext.authz_service.jwt_include_user_email=true

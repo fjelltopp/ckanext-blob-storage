@@ -65,6 +65,11 @@ you need to seperate permission scopes between them.
 
 If not specified, `ckan` will be used as the default namespace.
 
+`ckanext.external_storage.use_scheming_file_uploader = False`
+
+Set to true to use the a ckanext-scheming compatible file uploader
+rather than datapub for uploading files in the create-resource flow
+
 Developer installation
 ----------------------
 

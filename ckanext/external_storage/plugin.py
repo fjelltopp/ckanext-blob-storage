@@ -34,7 +34,7 @@ class ExternalStoragePlugin(plugins.SingletonPlugin, DefaultTranslation):
                 'extstorage_resource_authz_scope': helpers.resource_authz_scope,
                 'extstorage_resource_storage_prefix': helpers.resource_storage_prefix,
                 'extstorage_storage_namespace': helpers.storage_namespace,
-                'extstorage_use_legacy_file_uploader_ui': True}
+                'extstorage_use_scheming_file_uploader': helpers.use_scheming_file_uploader}
 
     # IBlueprint
 

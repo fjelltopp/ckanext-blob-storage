@@ -8,6 +8,7 @@ from six.moves.urllib.parse import urlparse
 
 SERVER_URL_CONF_KEY = 'ckanext.external_storage.storage_service_url'
 STORAGE_NAMESPACE_CONF_KEY = 'ckanext.external_storage.storage_namespace'
+USE_SCHEMING_FILE_UPLOADER = 'ckanext.external_storage.use_scheming_file_uploader'
 
 
 def resource_storage_prefix(package_name, org_name=None):
@@ -50,6 +51,12 @@ def storage_namespace():
     if ns:
         return ns
     return 'ckan'
+
+
+def use_scheming_file_uploader():
+    """Get the storage use_scheming_file_uploader setting for this CKAN instance
+    """
+    return toolkit.config.get(USE_SCHEMING_FILE_UPLOADER, False)
 
 
 def organization_name_for_package(package):
