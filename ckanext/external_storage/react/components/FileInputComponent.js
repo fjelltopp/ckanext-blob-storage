@@ -23,7 +23,7 @@ function App({ lfsServer, orgId, datasetId }) {
   if (!authToken) {
     // fetch authToken from ckan authz_authorize
     axios.post(
-      'http://adr/api/3/action/authz_authorize',
+      '/api/3/action/authz_authorize',
       { scopes: `obj:ckan/${datasetId}/*:write` },
       { withCredentials: true }
     )
