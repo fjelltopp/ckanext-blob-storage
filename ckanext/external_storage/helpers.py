@@ -56,7 +56,8 @@ def storage_namespace():
 def use_scheming_file_uploader():
     """Get the storage use_scheming_file_uploader setting for this CKAN instance
     """
-    return toolkit.config.get(USE_SCHEMING_FILE_UPLOADER, False)
+    val = toolkit.config.get(USE_SCHEMING_FILE_UPLOADER, None)
+    return val == 'True' if val else False
 
 
 def organization_name_for_package(package):
