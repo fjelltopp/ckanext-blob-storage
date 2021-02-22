@@ -8,3 +8,11 @@
     background-color: #fafafa;
     margin-bottom: 20px;
 }
+
+#FileInputComponent h3{
+    margin-bottom: 20px;
+}
+
+#FileInputComponent #urlInputField{
+    margin-bottom: 30px;
+}

@@ -5,6 +5,9 @@
     data-lfsServer="{{ h.extstorage_server_url() }}"
     data-orgId="{{ h.extstorage_resource_storage_prefix(pkg_name).split('/')[0] }}"
     data-datasetId="{{ pkg_name }}"
+    data-existingSha256="{{ data.sha256 if data else None }}"
+    data-existingName="{{ h.extstorage_resource_filename(data) if data else None }}"
+    data-existingSize="{{ data.size if data else None }}"
 ></div>
 
 {% asset 'external_storage/FileInputComponentScripts' %}

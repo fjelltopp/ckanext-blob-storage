@@ -1,12 +1,11 @@
 import ReactDOM from 'react-dom';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone'
 import { Client } from "giftless-client";
 import axios from "axios";
 
-function App({ lfsServer, orgId, datasetId }) {
+function App({ lfsServer, orgId, datasetId, existingResourceData }) {
   const [authToken, setAuthToken] = useState();
-
   const defaults = {
     uploadProgress: { loaded: 0, total: 0 },
     hiddenInputs: { sha256: null, name: null, size: null }
@@ -20,18 +19,29 @@ function App({ lfsServer, orgId, datasetId }) {
     setHiddenInputs(defaults.hiddenInputs);
   }
 
-  if (!authToken) {
-    // fetch authToken from ckan authz_authorize
+  useEffect(() => {
+    if (existingResourceData.sha256) {
+      const data = existingResourceData;
+      setUploadProgress({ loaded: data.size, total: data.size })
+      setHiddenInputs({
+        sha256: data.sha256, name: data.name, size: data.size
+      })
+    };
     axios.post(
       '/api/3/action/authz_authorize',
       { scopes: `obj:ckan/${datasetId}/*:write` },
       { withCredentials: true }
     )
-      .then(res => setAuthToken(res.data.result.token))
+      .then(res => {
+        setAuthToken(res.data.result.token)
+      })
       .catch(error => {
         console.log(`authz_authorize error: ${error}`);
         setAuthToken('error')
       })
+  }, [setAuthToken, setUploadProgress, setHiddenInputs]);
+
+  if (!authToken) {
     return ckan.i18n._('Loading');
   } else if (authToken === 'error') {
     return ckan.i18n._('Authentication Error: Failed to load file uploader');
@@ -56,7 +66,7 @@ function App({ lfsServer, orgId, datasetId }) {
         total: progress.total
       });
     }
-    return <Uploader {...{handleFileSelected}} />;
+    return <Uploader {...{ handleFileSelected }} />;
   }
   const inputs = [
     { name: 'url_type', value: 'upload' },
@@ -91,7 +101,7 @@ function Uploader({ handleFileSelected }) {
     }
     case 'url': {
       return (
-        <div>
+        <div id="urlInputField">
           <label className="control-label" htmlFor="field-url">{ckan.i18n._('URL')}</label>
           <div className="input-group">
             <input
@@ -111,7 +121,6 @@ function Uploader({ handleFileSelected }) {
               </button>
             </span>
           </div>
-          <br />
         </div>
       );
     }
@@ -172,7 +181,8 @@ function ProgressBar({ uploadProgress, hiddenInputs, resetFileUploader }) {
   const loaded = percent === 100 && hiddenInputs.name;
   return (
     <>
-      {loaded &&
+      {loaded
+        ?
         <h3>
           <i className="fa fa-file"></i>
         &nbsp; {hiddenInputs.name} &nbsp;
@@ -183,15 +193,16 @@ function ProgressBar({ uploadProgress, hiddenInputs, resetFileUploader }) {
             onClick={resetFileUploader}
           ></i>
         </h3>
-      }
-      <div className={`form-group controls progress ${!loaded && 'progress-striped active'}`}>
-        <div
-          className="progress-bar"
-          style={{ width: `${percent}%` }}
-        >
-          <span>{percent}%</span>
+        :
+        <div className={`form-group controls progress ${!loaded && 'progress-striped active'}`}>
+          <div
+            className="progress-bar"
+            style={{ width: `${percent}%` }}
+          >
+            <span>{percent}%</span>
+          </div>
         </div>
-      </div>
+      }
     </>
   )
 }
@@ -200,7 +211,7 @@ const componentElement =
   document.getElementById('FileInputComponent');
 const getAttr = key => {
   const val = componentElement.getAttribute(`data-${key}`);
-  return val in ['None', ''] ? null : val;
+  return ['None', ''].includes(val) ? null : val;
 };
 const requiredString = str => {
   console.assert(str.length);
@@ -211,10 +222,22 @@ const
   orgId = requiredString(getAttr('orgId')),
   datasetId = requiredString(getAttr('datasetId'));
 
+let existingResourceData = {};
+if (getAttr('existingSha256')) {
+  existingResourceData = {
+    sha256: getAttr('existingSha256'),
+    name: getAttr('existingName'),
+    size: getAttr('existingSize'),
+  }
+}
+
 // wait for ckan.i18n to load
 window.addEventListener('load', function () {
   ReactDOM.render(
-    <App {...{ lfsServer, orgId, datasetId }} />,
+    <App {...{
+      lfsServer, orgId, datasetId,
+      existingResourceData
+    }} />,
     componentElement
   );
 })
