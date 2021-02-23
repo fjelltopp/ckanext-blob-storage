@@ -6,6 +6,8 @@ import axios from "axios";
 
 function App({ lfsServer, orgId, datasetId, existingResourceData }) {
   const [authToken, setAuthToken] = useState();
+  const [uploadType, setUploadType] = useState(null);
+  const [urlValue, setUrlValue] = useState(null);
   const defaults = {
     uploadProgress: { loaded: 0, total: 0 },
     hiddenInputs: { sha256: null, name: null, size: null }
@@ -20,12 +22,17 @@ function App({ lfsServer, orgId, datasetId, existingResourceData }) {
   }
 
   useEffect(() => {
-    if (existingResourceData.sha256) {
+    if (existingResourceData.urlType === 'upload') {
+      // resource already has a file uploaded
       const data = existingResourceData;
       setUploadProgress({ loaded: data.size, total: data.size })
       setHiddenInputs({
         sha256: data.sha256, name: data.name, size: data.size
       })
+    } else if (existingResourceData.url) {
+      // resource already has a url set
+      setUploadType('url');
+      setUrlValue(existingResourceData.url);
     };
     axios.post(
       '/api/3/action/authz_authorize',
@@ -39,77 +46,82 @@ function App({ lfsServer, orgId, datasetId, existingResourceData }) {
         console.log(`authz_authorize error: ${error}`);
         setAuthToken('error')
       })
-  }, [setAuthToken, setUploadProgress, setHiddenInputs]);
+  }, [setAuthToken, setUploadProgress, setHiddenInputs, setUploadType]);
 
+  // return auth status if not completed
   if (!authToken) {
     return ckan.i18n._('Loading');
   } else if (authToken === 'error') {
     return ckan.i18n._('Authentication Error: Failed to load file uploader');
   }
 
-  if (uploadProgress.total === 0) {
-    const handleFileSelected = async inputFile => {
-      if (!inputFile) return;
-      const file = data.open(inputFile);
-      const client = new Client(lfsServer, authToken, ['basic']);
-      await client.upload(file, orgId, datasetId, onProgress);
-      setUploadProgress({ loaded: 100, total: 100 });
-      setHiddenInputs({
-        sha256: file._computedHashes.sha256,
-        name: file._descriptor.name,
-        size: file._descriptor.size,
-      })
-    }
-    function onProgress(progress) {
-      setUploadProgress({
-        loaded: progress.loaded,
-        total: progress.total
-      });
-    }
-    return <Uploader {...{ handleFileSelected }} />;
-  }
-  const inputs = [
-    { name: 'url_type', value: 'upload' },
-    { name: 'lfs_prefix', value: [orgId, datasetId].join('/') },
-    { name: 'url', value: hiddenInputs.name },
-    { name: 'sha256', value: hiddenInputs.sha256 },
-    { name: 'size', value: hiddenInputs.size }
-  ];
-  return (
-    <>
-      <ProgressBar
-        {...{ uploadProgress, hiddenInputs, resetFileUploader }}
-      />
-      {inputs.map(input =>
-        <input
-          key={input.name}
-          name={input.name}
-          value={input.value || ''}
-          type="hidden"
+  // return progress bar if file upload in progress
+  if (uploadProgress.total) {
+    const inputs = [
+      { name: 'url_type', value: 'upload' },
+      { name: 'lfs_prefix', value: [orgId, datasetId].join('/') },
+      { name: 'url', value: hiddenInputs.name },
+      { name: 'sha256', value: hiddenInputs.sha256 },
+      { name: 'size', value: hiddenInputs.size }
+    ];
+    return (
+      <>
+        <ProgressBar
+          {...{ uploadProgress, hiddenInputs, resetFileUploader }}
         />
-      )}
-    </>
-  );
+        {inputs.map(input =>
+          <input
+            key={input.name}
+            name={input.name}
+            value={input.value || ''}
+            type="hidden"
+          />
+        )}
+      </>
+    );
+  }
 
-}
-
-function Uploader({ handleFileSelected }) {
-  const [uploadType, setUploadType] = useState(null);
   switch (uploadType) {
     default: {
+      // return file uploader
+      const handleFileSelected = async inputFile => {
+        if (!inputFile) return;
+        const file = data.open(inputFile);
+        const client = new Client(lfsServer, authToken, ['basic']);
+        await client.upload(file, orgId, datasetId, progress => {
+          setUploadProgress({
+            loaded: progress.loaded,
+            total: progress.total
+          });
+        });
+        setUploadProgress({ loaded: 100, total: 100 });
+        setHiddenInputs({
+          sha256: file._computedHashes.sha256,
+          name: file._descriptor.name,
+          size: file._descriptor.size,
+        })
+      }
       return <FileUploader {...{ handleFileSelected, setUploadType }} />
     }
     case 'url': {
+      // return url field
       return (
         <div id="urlInputField">
           <label className="control-label" htmlFor="field-url">{ckan.i18n._('URL')}</label>
           <div className="input-group">
+            <input
+              key="url_type"
+              name="url_type"
+              value=""
+              type="hidden"
+            />
             <input
               id="field-url"
               type="url"
               name="url"
               placeholder="http://example.com/my-data.csv"
               className="form-control"
+              defaultValue={urlValue}
             />
             <span className="input-group-btn">
               <button
@@ -125,6 +137,7 @@ function Uploader({ handleFileSelected }) {
       );
     }
   }
+
 }
 
 function FileUploader({ handleFileSelected, setUploadType }) {
@@ -222,13 +235,12 @@ const
   orgId = requiredString(getAttr('orgId')),
   datasetId = requiredString(getAttr('datasetId'));
 
-let existingResourceData = {};
-if (getAttr('existingSha256')) {
-  existingResourceData = {
-    sha256: getAttr('existingSha256'),
-    name: getAttr('existingName'),
-    size: getAttr('existingSize'),
-  }
+const existingResourceData = {
+  urlType: getAttr('existingUrlType'),
+  url: getAttr('existingUrl'),
+  sha256: getAttr('existingSha256'),
+  name: getAttr('existingName'),
+  size: getAttr('existingSize'),
 }
 
 // wait for ckan.i18n to load

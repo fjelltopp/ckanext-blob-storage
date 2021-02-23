@@ -2,7 +2,7 @@ const path = require('path')
 
 const components = {
     'FileInputComponent':
-        path.resolve(__dirname, 'components', 'FileInputComponent.js')
+        path.resolve(__dirname, 'components', 'FileInputComponent/index.js')
 }
 
 module.exports = {
