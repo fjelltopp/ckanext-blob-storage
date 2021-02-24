@@ -1,5 +1,28 @@
 {% asset 'external_storage/FileInputComponentStyles' %}
 
+<!-- TODO: delete this section before deploying! -->
+<div class="panel panel-danger">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            <span>Resource JSON</span>
+            <span class="pull-right"><i class="fa fa-exclamation-triangle"></i> Remember to delete</span>
+        </h3>
+    </div>
+        <div class="well" style="margin: 0;">
+            {{
+            data
+            | replace("u'", "'")
+            | replace("'", '"')
+            | replace('None', 'null')
+            | replace('True', 'true')
+            | replace('False', 'false')
+            | replace('"{', '{')
+            | replace('}"', '}')
+            }}
+        </div>
+</div>
+
+
 <div
     id="FileInputComponent"
     data-lfsServer="{{ h.extstorage_server_url() }}"
@@ -8,7 +31,7 @@
     data-existingUrlType="{{ data.url_type if data else None }}"
     data-existingUrl="{{ data.url if data else None }}"
     data-existingSha256="{{ data.sha256 if data else None }}"
-    data-existingName="{{ h.extstorage_resource_filename(data) if data else None }}"
+    data-existingFileName="{{ h.extstorage_resource_filename(data) if data else None }}"
     data-existingSize="{{ data.size if data else None }}"
 ></div>
 
