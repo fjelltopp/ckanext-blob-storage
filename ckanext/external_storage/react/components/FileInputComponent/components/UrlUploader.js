@@ -3,13 +3,14 @@ import React from 'react';
 export default function UrlUploader({ linkUrl, resetComponent }) {
 
     return (
-        <div id="urlInputField">
+        <div data-testid="UrlUploaderComponent">
             <label className="control-label" htmlFor="field-url">
                 {ckan.i18n._('URL')}
             </label>
             <div className="input-group">
                 <input
                     id="field-url"
+                    data-testid="UrlInputField"
                     type="url"
                     name="url"
                     placeholder="http://example.com/my-data.csv"

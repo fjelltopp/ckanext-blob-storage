@@ -37,6 +37,7 @@ export default function FileUploader({
 
     const uploadOptions = [
         {
+            name: 'FileUploaderButton',
             label: ckan.i18n._('Upload a file'),
             icon: 'fa-cloud-upload',
             onClick: e => {
@@ -45,6 +46,7 @@ export default function FileUploader({
             }
         },
         {
+            name: 'UrlUploaderButton',
             label: ckan.i18n._('Link'),
             icon: 'fa-globe',
             onClick: e => {
@@ -55,13 +57,14 @@ export default function FileUploader({
     ]
 
     return (
-        <div {...getRootProps({ className: 'dropzone' })}>
-            <input {...getInputProps()} />
+        <div {...getRootProps({ className: 'dropzone' })} data-testid="FileUploaderComponent">
+            <input {...getInputProps()} data-testid="FileUploaderInput" />
             <p>{ckan.i18n._('Drag a file into this box or')}</p>
             <div className="btn-group">
                 {uploadOptions.map(option => (
                     <button
-                        key={option.label}
+                        key={option.name}
+                        data-testid={option.name}
                         className="btn btn-default"
                         onClick={option.onClick}
                     >
