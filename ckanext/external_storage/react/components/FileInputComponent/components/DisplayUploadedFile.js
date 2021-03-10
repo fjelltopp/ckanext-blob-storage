@@ -13,6 +13,7 @@ export default function DisplayUploadedFile({
                 style={{ cursor: 'pointer' }}
                 title={ckan.i18n._('Remove')}
                 onClick={resetComponent}
+                data-testid="RemoveFileButton"
             ></i>
         </h3>
     )
