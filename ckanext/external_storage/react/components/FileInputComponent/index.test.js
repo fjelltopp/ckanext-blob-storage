@@ -11,7 +11,7 @@ giftless.Client = jest.fn(() => ({
 
 //afterEach(() => screen.debug())
 
-beforeEach(async () => {
+async function renderAppComponent(existingResourceData) {
   await act(async () => {
 
     // arrange
@@ -19,14 +19,7 @@ beforeEach(async () => {
       lfsServer: 'mockedLfsServer',
       orgId: 'mockedOrgId',
       datasetId: 'mockedDatasetId',
-      existingResourceData: {
-        urlType: null,
-        url: null,
-        sha256: null,
-        name: null,
-        fileName: null,
-        size: null,
-      }
+      existingResourceData: existingResourceData
     };
     const mockedAxiosPost = axios.post.mockImplementation(() =>
       Promise.resolve({
@@ -42,64 +35,132 @@ beforeEach(async () => {
     expect(mockedAxiosPost).toHaveBeenCalled();
 
     // assert
-    expect(getByTestId('FileUploaderButton')).toBeInTheDocument();
-    expect(getByTestId('UrlUploaderButton')).toBeInTheDocument();
+    if (existingResourceData.urlType === null) {
+      expect(getByTestId('FileUploaderButton')).toBeInTheDocument();
+      expect(getByTestId('UrlUploaderButton')).toBeInTheDocument();
+    }
 
   })
-})
+}
 
-describe('url upload', () => {
+describe('upload a new resources', () => {
 
-  test('correct inputs are displayed', async () => {
+  beforeEach(async () => {
+    await renderAppComponent({
+      urlType: null,
+      url: null,
+      sha256: null,
+      fileName: null,
+      size: null,
+    });
+  })
 
-    // act
-    fireEvent.click(screen.getByTestId('UrlUploaderButton'));
-    expect(screen.getByTestId('UrlUploaderComponent')).toBeInTheDocument();
-    expect(screen.getByTestId('UrlInputField')).toBeInTheDocument();
+  describe('url upload', () => {
 
-    // assert
-    expect(screen.getByTestId('url_type')).toHaveValue('')
-    expect(screen.getByTestId('lfs_prefix')).toHaveValue('')
-    expect(screen.getByTestId('sha256')).toHaveValue('')
-    expect(screen.getByTestId('size')).toHaveValue('')
+    test('correct inputs are displayed', async () => {
+
+      // act
+      fireEvent.click(screen.getByTestId('UrlUploaderButton'));
+      expect(screen.getByTestId('UrlUploaderComponent')).toBeInTheDocument();
+      expect(screen.getByTestId('UrlInputField')).toBeInTheDocument();
+
+      // assert
+      expect(screen.getByTestId('url_type')).toHaveValue('')
+      expect(screen.getByTestId('lfs_prefix')).toHaveValue('')
+      expect(screen.getByTestId('sha256')).toHaveValue('')
+      expect(screen.getByTestId('size')).toHaveValue('')
+
+    });
 
   });
 
+  describe('file upload', () => {
+
+    const uploadFileToElement = async elementTestId => {
+      // arrange
+      const component = screen.getByTestId(elementTestId);
+
+      // act
+      const file = new File(['file'], 'data.json');
+      Object.defineProperty(component, 'files', { value: [file] });
+      fireEvent.drop(component);
+
+      // assert
+      await screen.findByText('data.json')
+    }
+
+    test('file upload using the <input type="file" />', async () => {
+      await uploadFileToElement('FileUploaderInput');
+    });
+
+    test('file upload using drag and drop', async () => {
+      await uploadFileToElement('FileUploaderComponent');
+    });
+
+    test('correct inputs are displayed', async () => {
+
+      // arrange & act
+      await uploadFileToElement('FileUploaderInput');
+
+      // assert
+      expect(screen.getByTestId('url_type')).toHaveValue('upload')
+      expect(screen.getByTestId('lfs_prefix')).toHaveValue('mockedOrgId/mockedDatasetId')
+      expect(screen.getByTestId('sha256')).toHaveValue('mockedSha256')
+      expect(screen.getByTestId('size')).toHaveValue('1337')
+    });
+
+  });
 });
 
-describe('file upload', () => {
+describe('view an existing resources', () => {
 
-  const uploadFileToElement = async elementTestId => {
-    // arrange
-    const component = screen.getByTestId(elementTestId);
+  describe('url upload', () => {
 
-    // act
-    const file = new File(['file'], 'data.json');
-    Object.defineProperty(component, 'files', { value: [file] });
-    fireEvent.drop(component);
+    test('correct inputs are displayed', async () => {
 
-    // assert
-    await screen.findByText('data.json')
-  }
+      // arrange
+      const existingResourceData = {
+        urlType: '', // empty string means it's a url upload
+        url: 'existingUrl',
+      };
 
-  test('file upload using the <input type="file" />', async () => {
-    await uploadFileToElement('FileUploaderInput');
+      // act
+      await renderAppComponent(existingResourceData);
+
+      // assert
+      expect(screen.getByTestId('UrlInputField')).toHaveValue(existingResourceData.url)
+      expect(screen.getByTestId('url_type')).toHaveValue(existingResourceData.urlType)
+      // no need to assert anything else as ckan backend will
+      // ignore all the other fields like sha256, size etc
+
+    });
+
   });
 
-  test('file upload using drag and drop', async () => {
-    await uploadFileToElement('FileUploaderComponent');
-  });
+  describe('file upload', () => {
 
-  test('correct inputs are displayed', async () => {
+    test('correct inputs are displayed', async () => {
 
-    // arrange & act
-    await uploadFileToElement('FileUploaderInput');
+      // arrange
+      const existingResourceData = {
+        urlType: 'upload', // 'upload' means it's a file upload
+        url: 'existingUrl',
+        sha256: 'existingSha256',
+        fileName: 'existingFileName',
+        size: 'existingSize',
+      };
 
-    // assert
-    expect(screen.getByTestId('url_type')).toHaveValue('upload')
-    expect(screen.getByTestId('lfs_prefix')).toHaveValue('mockedOrgId/mockedDatasetId')
-    expect(screen.getByTestId('sha256')).toHaveValue('mockedSha256')
-    expect(screen.getByTestId('size')).toHaveValue('1337')
+      // act
+      await renderAppComponent(existingResourceData);
+
+      // assert
+      expect(screen.getByTestId('url_type')).toHaveValue(existingResourceData.urlType)
+      expect(screen.getByTestId('lfs_prefix')).toHaveValue('mockedOrgId/mockedDatasetId')
+      expect(screen.getByTestId('sha256')).toHaveValue(existingResourceData.sha256)
+      expect(screen.getByTestId('size')).toHaveValue(existingResourceData.size)
+
+    });
+
   });
 
 });
