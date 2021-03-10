@@ -66,7 +66,6 @@ export default function App({ lfsServer, orgId, datasetId, existingResourceData 
         if (data.urlType === 'upload') {
             // resource already has a file
             setUploadFileName(data.fileName)
-            console.log(data.fileName)
             setUploadProgress({
                 ...defaultUploadProgress,
                 loaded: data.size,
