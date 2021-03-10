@@ -21,7 +21,6 @@ const existingResourceData = {
   urlType: getAttr('existingUrlType'),
   url: getAttr('existingUrl'),
   sha256: getAttr('existingSha256'),
-  name: getAttr('existingName'),
   fileName: getAttr('existingFileName'),
   size: getAttr('existingSize'),
 }
