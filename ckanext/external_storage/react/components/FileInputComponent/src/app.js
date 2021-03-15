@@ -30,8 +30,7 @@ export default function App({ lfsServer, orgId, datasetId, existingResourceData 
                     }
                 case 'url':
                     const fileFormatField = document.getElementById('field-format');
-                    // TODO: find a better format value than msdos
-                    if (fileFormatField) fileFormatField.value = 'application/x-msdos-program';
+                    if (fileFormatField) fileFormatField.value = 'url';
                     return {
                         url_type: null,
                         lfs_prefix: null,
