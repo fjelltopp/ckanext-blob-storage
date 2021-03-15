@@ -9,6 +9,7 @@ export default function FileUploader({
 
     const handleFileSelected = async inputFile => {
         if (!inputFile) return;
+        setUploadProgress({ loaded: 0, total: 1 });
         const file = data.open(inputFile);
         const client = new Client(lfsServer, authToken, ['basic']);
         await client.upload(file, orgId, datasetId, progress => {

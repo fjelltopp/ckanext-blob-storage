@@ -6,7 +6,7 @@ const components = {
 }
 
 module.exports = {
-    mode: 'production',
+    mode: 'development',
     target:'web',
     entry: components,
     output: {
