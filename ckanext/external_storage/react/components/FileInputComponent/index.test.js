@@ -9,8 +9,6 @@ giftless.Client = jest.fn(() => ({
   upload: jest.fn()
 }));
 
-//afterEach(() => screen.debug());
-
 async function renderAppComponent(existingResourceData) {
   await act(async () => {
     const mockedAppProps = {
