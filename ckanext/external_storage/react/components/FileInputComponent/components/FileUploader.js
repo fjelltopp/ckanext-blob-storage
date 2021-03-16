@@ -4,7 +4,8 @@ import { Client } from "giftless-client";
 
 export default function FileUploader({
     lfsServer, orgId, datasetId, authToken,
-    setUploadProgress, setUploadFileName, setHiddenInputs
+    setUploadProgress, setUploadFileName, setHiddenInputs,
+    setUploadFailed
 }) {
 
     const handleFileSelected = async inputFile => {
@@ -17,6 +18,9 @@ export default function FileUploader({
                 loaded: progress.loaded,
                 total: progress.total
             });
+        }).catch(error => {
+            setUploadFailed(true);
+            throw error;
         });
         setUploadProgress({ loaded: 100, total: 100 });
         setUploadFileName(file._descriptor.name);
