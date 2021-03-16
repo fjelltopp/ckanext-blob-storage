@@ -8,7 +8,6 @@ export default function ProgressBar({ uploadProgress }) {
 
     const threashold = 10;
     const preparing = percent < threashold;
-    console.log(`${percent}% loaded`); // TODO: remove
 
     return (
         <div className="form-group controls progress progress-striped active">
