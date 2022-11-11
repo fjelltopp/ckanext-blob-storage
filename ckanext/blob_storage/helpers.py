@@ -92,29 +92,33 @@ def resource_filename(resource):
     return resource['url']
 
 
-def find_activity_resource(dataset_id, resource_id, context):
+def find_activity_resource(activity_id, dataset_id, resource_id, context) -> (bool, dict, dict):
     """check if resource in a release
     """
-    resource = None
-    activity_id = request.args.get('activity_id')
+    resource, package = None, None
+    resource_found = False
+
     if activity_id and toolkit.check_ckan_version(min_version='2.9'):
         try:
             activity = toolkit.get_action(u'activity_show')(
                 context, {u'id': activity_id, u'include_data': True})
             activity_dataset = activity['data']['package']
 
-            assert activity_dataset['name'] == dataset_id
+            assert (activity_dataset['name'] == dataset_id) or (activity_dataset['id'] == dataset_id)
+
             activity_resources = activity_dataset['resources']
             for r in activity_resources:
                 if r['id'] == resource_id:
                     resource = r
+                    package = activity_dataset
+                    print(package)
                     break
             if resource:
-                return True
-        except toolkit.NotFound:
-            pass
+                resource_found = True
+        except AssertionError or toolkit.NotFound:
+            toolkit.abort(404, toolkit._(u'Activity not found'))
 
-    return False
+    return resource_found, package, resource
 
 
 def check_resource_in_dataset(resource_id, dataset_id, context=None):
@@ -122,12 +126,13 @@ def check_resource_in_dataset(resource_id, dataset_id, context=None):
     """Check that a resource exists in the dataset
     """
     try:
+        activity_id = request.args.get('activity_id')
         ds = toolkit.get_action('package_show')(context, {"id": dataset_id})
         for resource in ds['resources']:
             if resource['id'] == resource_id:
                 return True
         else:
-            return find_activity_resource(dataset_id, resource_id, context)
+            return find_activity_resource(activity_id, dataset_id, resource_id, context)[0]
 
     except (toolkit.ObjectNotFound, toolkit.NotAuthorized):
         pass

@@ -4,6 +4,7 @@ from ckan.plugins import toolkit
 from flask import Blueprint, request
 
 from .download_handler import call_download_handlers, call_pre_download_handlers, get_context
+from . import helpers
 
 blueprint = Blueprint(
     'blob_storage',
@@ -17,26 +18,27 @@ def download(id, resource_id, filename=None):
     This calls all registered download handlers in order, until
     a response is returned to the user
     """
+
+    # we will check if the resource was not found
+    not_found_in_package = False
     context = get_context()
-    resource = None
+    resource = package = {}
+
+    try:
+        resource = toolkit.get_action('resource_show')(context, {'id': resource_id})
+        if id != resource['package_id']:
+            return toolkit.abort(404, toolkit._('Resource not found belonging to package'))
+        package = toolkit.get_action('package_show')(context, {'id': id})
+    except toolkit.ObjectNotFound:
+        not_found_in_package = True
+    except toolkit.NotAuthorized:
+        return toolkit.abort(401, toolkit._('Not authorized to read resource {0}'.format(id)))
 
     activity_id = request.args.get('activity_id')
     inline = toolkit.asbool(request.args.get('preview'))
 
-    if activity_id and toolkit.check_ckan_version(min_version='2.9'):
-        try:
-            activity = toolkit.get_action(u'activity_show')(
-                context, {u'id': activity_id, u'include_data': True})
-            activity_dataset = activity['data']['package']
-            assert activity_dataset['id'] == id
-            activity_resources = activity_dataset['resources']
-            for r in activity_resources:
-                if r['id'] == resource_id:
-                    resource = r
-                    package = activity_dataset
-                    break
-        except toolkit.NotFound:
-            toolkit.abort(404, toolkit._(u'Activity not found'))
+    if not_found_in_package:
+        _, package, resource = helpers.find_activity_resource(activity_id, id, resource_id, get_context())
 
     try:
         resource = call_pre_download_handlers(resource, package, activity_id=activity_id)
