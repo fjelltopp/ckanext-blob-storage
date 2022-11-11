@@ -20,16 +20,6 @@ def download(id, resource_id, filename=None):
     context = get_context()
     resource = None
 
-    try:
-        resource = toolkit.get_action('resource_show')(context, {'id': resource_id})
-        if id != resource['package_id']:
-            return toolkit.abort(404, toolkit._('Resource not found belonging to package'))
-        package = toolkit.get_action('package_show')(context, {'id': id})
-    except toolkit.ObjectNotFound:
-        return toolkit.abort(404, toolkit._('Resource not found'))
-    except toolkit.NotAuthorized:
-        return toolkit.abort(401, toolkit._('Not authorized to read resource {0}'.format(id)))
-
     activity_id = request.args.get('activity_id')
     inline = toolkit.asbool(request.args.get('preview'))
 

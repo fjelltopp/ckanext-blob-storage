@@ -6,6 +6,9 @@ from typing import Any, Dict, Optional
 import ckan.plugins.toolkit as toolkit
 from six.moves.urllib.parse import urlparse
 
+from flask import request
+
+
 SERVER_URL_CONF_KEY = 'ckanext.blob_storage.storage_service_url'
 STORAGE_NAMESPACE_CONF_KEY = 'ckanext.blob_storage.storage_namespace'
 
@@ -87,3 +90,46 @@ def resource_filename(resource):
         url_path = urlparse(resource['url']).path
         return path.basename(url_path)
     return resource['url']
+
+
+def find_activity_resource(dataset_id, resource_id, context):
+    """check if resource in a release
+    """
+    resource = None
+    activity_id = request.args.get('activity_id')
+    if activity_id and toolkit.check_ckan_version(min_version='2.9'):
+        try:
+            activity = toolkit.get_action(u'activity_show')(
+                context, {u'id': activity_id, u'include_data': True})
+            activity_dataset = activity['data']['package']
+
+            assert activity_dataset['name'] == dataset_id
+            activity_resources = activity_dataset['resources']
+            for r in activity_resources:
+                if r['id'] == resource_id:
+                    resource = r
+                    break
+            if resource:
+                return True
+        except toolkit.NotFound:
+            pass
+
+    return False
+
+
+def check_resource_in_dataset(resource_id, dataset_id, context=None):
+    # type: (str, str, OptionalCkanContext) -> bool
+    """Check that a resource exists in the dataset
+    """
+    try:
+        ds = toolkit.get_action('package_show')(context, {"id": dataset_id})
+        for resource in ds['resources']:
+            if resource['id'] == resource_id:
+                return True
+        else:
+            return find_activity_resource(dataset_id, resource_id, context)
+
+    except (toolkit.ObjectNotFound, toolkit.NotAuthorized):
+        pass
+
+    return False
