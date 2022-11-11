@@ -111,7 +111,6 @@ def find_activity_resource(activity_id, dataset_id, resource_id, context) -> (bo
                 if r['id'] == resource_id:
                     resource = r
                     package = activity_dataset
-                    print(package)
                     break
             if resource:
                 resource_found = True
