@@ -111,17 +111,6 @@ def _check_resource_in_dataset(resource_id, dataset_id, context=None):
     return False
 
 
-def activity_resource_show(context, data_dict):
-    activity_id = data_dict.get('activity_id', None)
-    dataset_id = data_dict.get('dataset_id', None)
-    resource_id = data_dict.get('resource_id', None)
-
-    if activity_id and dataset_id and resource_id:
-        return find_activity_resource(activity_id, resource_id, dataset_id, context)[1]
-    else:
-        raise AttributeError("Attribute(s) not found")
-
-
 def find_activity_resource(activity_id, resource_id, dataset_id, context) -> (dict, dict):
     """check if resource in a release
     """
