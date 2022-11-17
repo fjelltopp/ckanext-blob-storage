@@ -111,27 +111,30 @@ def _check_resource_in_dataset(resource_id, dataset_id, context=None):
     return False
 
 
-def find_activity_resource(activity_id, resource_id, dataset_id, context) -> (dict, dict):
-    """check if resource in a release
-    """
-    if activity_id and toolkit.check_ckan_version(min_version='2.9'):
-        try:
-            activity = toolkit.get_action(u'activity_show')(
-                context, {u'id': activity_id, u'include_data': True})
-            activity_dataset = activity['data']['package']
+def get_activity_data(activity_id, resource_id, dataset_id, context):
+    if not activity_id:
+        raise AttributeError("Activity_id not provided")
 
-            assert (activity_dataset['name'] == dataset_id) or (activity_dataset['id'] == dataset_id)
+    if not toolkit.check_ckan_version(min_version='2.9'):
+        return None
 
-            activity_resources = activity_dataset['resources']
-            for r in activity_resources:
-                if r['id'] == resource_id:
-                    resource = r
-                    package = activity_dataset
-                    return package, resource
-        except AssertionError or toolkit.NotFound:
-            pass
+    try:
+        activity = toolkit.get_action(u'activity_show')(
+            context, {u'id': activity_id, u'include_data': True})
+        activity_dataset = activity['data']['package']
 
-    return None, None
+        assert (activity_dataset['name'] == dataset_id) or (activity_dataset['id'] == dataset_id)
+
+        activity_resources = activity_dataset['resources']
+        for r in activity_resources:
+            if r['id'] == resource_id:
+                resource = r
+                package = activity_dataset
+                return package, resource
+    except AssertionError or toolkit.NotFound:
+        pass
+
+    return None
 
 
 def check_resource_permissions(id, dataset_id=None, organization_id=None, activity_id=None, context=None):
@@ -145,7 +148,7 @@ def check_resource_permissions(id, dataset_id=None, organization_id=None, activi
         # Resource permissions for "all resources" can be taken from dataset permissions
         return granted.intersection(set(RES_ENTITY_CHECKS.keys()))
 
-    if not find_activity_resource(activity_id, id, dataset_id, context=context) and \
+    if not get_activity_data(activity_id, id, dataset_id, context=context) and \
             not _check_resource_in_dataset(resource_id=id, dataset_id=dataset_id, context=context):
         return set()
 

@@ -4,7 +4,7 @@ from ckan.plugins import toolkit
 from flask import Blueprint, request
 
 from .download_handler import call_download_handlers, call_pre_download_handlers, get_context
-from .helpers import find_activity_resource
+from .helpers import get_activity_data
 
 blueprint = Blueprint(
     'blob_storage',
@@ -22,11 +22,12 @@ def download(id, resource_id, filename=None):
     activity_id = request.args.get('activity_id')
 
     try:
-        if activity_id is None:
-            package = toolkit.get_action('package_show')(context, {'id': id})
-            resource = toolkit.get_action('resource_show')(context, {'id': resource_id})
+        package = toolkit.get_action('package_show')(context, {'id': id})
+
+        if activity_id:
+            package, resource = get_activity_data(activity_id=activity_id, resource_id=resource_id, dataset_id=id, context=context)
         else:
-            package, resource = find_activity_resource(activity_id=activity_id, resource_id=resource_id, dataset_id=id, context=context)
+            resource = toolkit.get_action('resource_show')(context, {'id': resource_id})
 
         if id != resource['package_id']:
             return toolkit.abort(404, toolkit._('Resource not found belonging to package'))
@@ -34,6 +35,8 @@ def download(id, resource_id, filename=None):
         return toolkit.abort(404, toolkit._('Resource not found'))
     except toolkit.NotAuthorized:
         return toolkit.abort(401, toolkit._('Not authorized to read resource {0}'.format(id)))
+    except toolkit.NotFound:
+        toolkit.abort(404, toolkit._(u'Activity not found'))
 
     inline = toolkit.asbool(request.args.get('preview'))
 

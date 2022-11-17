@@ -33,10 +33,7 @@ def check_object_permissions(id, dataset_id=None, organization_id=None, context=
             organization_id = None  # Dataset has no organization
         log.debug("Real resource path is res:%s/%s/%s", organization_id, dataset_id, id)
 
-    try:
-        resource_authz._check_resource_in_dataset = helpers.check_resource_in_dataset
-    finally:
-        return resource_authz.check_resource_permissions(id, dataset_id, organization_id, context=context)
+    return resource_authz.check_resource_permissions(id, dataset_id, organization_id, context=context)
 
 
 def object_id_parser(*args, **kwargs):
