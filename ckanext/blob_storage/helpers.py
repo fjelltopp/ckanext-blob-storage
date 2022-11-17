@@ -6,8 +6,10 @@ from typing import Any, Dict, Optional
 import ckan.plugins.toolkit as toolkit
 from six.moves.urllib.parse import urlparse
 
-from flask import request
-
+from ckanext.authz_service.authz_binding.dataset import check_dataset_permissions
+from ckanext.authz_service.authz_binding.common import OptionalCkanContext, check_entity_permissions, get_user_context, \
+    normalize_id_part
+from ckanext.authz_service.authz_binding.resource import RES_ENTITY_CHECKS
 
 SERVER_URL_CONF_KEY = 'ckanext.blob_storage.storage_service_url'
 STORAGE_NAMESPACE_CONF_KEY = 'ckanext.blob_storage.storage_namespace'
@@ -92,12 +94,26 @@ def resource_filename(resource):
     return resource['url']
 
 
-def find_activity_resource(activity_id, dataset_id, resource_id, context) -> (bool, dict, dict):
+def _check_resource_in_dataset(resource_id, dataset_id, context=None):
+    # type: (str, str, OptionalCkanContext) -> bool
+    """Check that a resource exists in the dataset
+    """
+    if context is None:
+        context = get_user_context()
+    try:
+        ds = toolkit.get_action('package_show')(context, {"id": dataset_id})
+        for resource in ds['resources']:
+            if resource['id'] == resource_id:
+                return True
+    except (toolkit.ObjectNotFound, toolkit.NotAuthorized):
+        pass
+
+    return False
+
+
+def find_activity_resource(activity_id, resource_id, dataset_id, context) -> (dict, dict):
     """check if resource in a release
     """
-    resource, package = None, None
-    resource_found = False
-
     if activity_id and toolkit.check_ckan_version(min_version='2.9'):
         try:
             activity = toolkit.get_action(u'activity_show')(
@@ -111,29 +127,26 @@ def find_activity_resource(activity_id, dataset_id, resource_id, context) -> (bo
                 if r['id'] == resource_id:
                     resource = r
                     package = activity_dataset
-                    break
-            if resource:
-                resource_found = True
+                    return package, resource
         except AssertionError or toolkit.NotFound:
-            toolkit.abort(404, toolkit._(u'Activity not found'))
+            pass
 
-    return resource_found, package, resource
+    return None, None
 
 
-def check_resource_in_dataset(resource_id, dataset_id, context=None):
-    # type: (str, str, OptionalCkanContext) -> bool
-    """Check that a resource exists in the dataset
+def check_resource_permissions(id, dataset_id=None, organization_id=None, activity_id=None, context=None):
+    """Check what resource permissions a user has
     """
-    try:
-        activity_id = request.args.get('activity_id')
-        ds = toolkit.get_action('package_show')(context, {"id": dataset_id})
-        for resource in ds['resources']:
-            if resource['id'] == resource_id:
-                return True
-        else:
-            return find_activity_resource(activity_id, dataset_id, resource_id, context)[0]
+    if dataset_id is None:
+        return set()
 
-    except (toolkit.ObjectNotFound, toolkit.NotAuthorized):
-        pass
+    granted = check_dataset_permissions(id=dataset_id, organization_id=organization_id, context=context)
+    if id == '*' or id is None:
+        # Resource permissions for "all resources" can be taken from dataset permissions
+        return granted.intersection(set(RES_ENTITY_CHECKS.keys()))
 
-    return False
+    if not find_activity_resource(activity_id, id, dataset_id, context=context) and \
+            not _check_resource_in_dataset(resource_id=id, dataset_id=dataset_id, context=context):
+        return set()
+
+    return check_entity_permissions(RES_ENTITY_CHECKS, {"id": id}, context=context)
