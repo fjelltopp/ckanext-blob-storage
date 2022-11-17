@@ -125,7 +125,8 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
         return {
             'get_resource_download_spec': actions.get_resource_download_spec,
             'resource_schema_show': actions.resource_schema_show,
-            'resource_sample_show': actions.resource_sample_show
+            'resource_sample_show': actions.resource_sample_show,
+            'activity_resource_show': helpers.activity_resource_show
         }
 
     # IAuthorizationBindings
@@ -144,7 +145,7 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
                                        subscopes=(None, 'data', 'metadata'))
 
         authorizer.register_authorizer('obj', helpers.check_resource_permissions,
-                                       actions={'read'},
+                                       actions={'update', 'read'},
                                        subscopes=(None, 'data', 'metadata'))
 
         authorizer.register_action_alias('write', 'update', 'obj')
