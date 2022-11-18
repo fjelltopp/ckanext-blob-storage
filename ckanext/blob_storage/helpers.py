@@ -112,8 +112,6 @@ def _check_resource_in_dataset(resource_id, dataset_id, context=None):
 
 
 def find_activity_package_and_resource(activity_id, resource_id, dataset_id, context) -> (dict, dict):
-    """check if resource in a release
-    """
     if not (activity_id and toolkit.check_ckan_version(min_version='2.9')):
         return None, None
 
