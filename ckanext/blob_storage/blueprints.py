@@ -4,7 +4,7 @@ from ckan.plugins import toolkit
 from flask import Blueprint, request
 
 from .download_handler import call_download_handlers, call_pre_download_handlers, get_context
-from .helpers import find_activity_resource
+from .helpers import find_activity_package_and_resource
 
 blueprint = Blueprint(
     'blob_storage',
@@ -24,7 +24,7 @@ def download(id, resource_id, filename=None):
     try:
         package, resource = (toolkit.get_action('package_show')(context, {'id': id}), toolkit.get_action('resource_show')(context, {'id': resource_id})) \
                                 if activity_id is None \
-                                else find_activity_resource(activity_id=activity_id, resource_id=resource_id, dataset_id=id, context=context)
+                                else find_activity_package_and_resource(activity_id=activity_id, resource_id=resource_id, dataset_id=id, context=context)
 
         if id != resource['package_id']:
             return toolkit.abort(404, toolkit._('Resource not found belonging to package'))

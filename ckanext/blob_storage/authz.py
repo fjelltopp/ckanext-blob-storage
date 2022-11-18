@@ -123,7 +123,7 @@ def check_resource_permissions(id, dataset_id=None, organization_id=None, activi
         # Resource permissions for "all resources" can be taken from dataset permissions
         return granted.intersection(set(RES_ENTITY_CHECKS.keys()))
 
-    if not helpers.find_activity_resource(activity_id, id, dataset_id, context=context) and \
+    if not helpers.find_activity_package_and_resource(activity_id, id, dataset_id, context=context) and \
             not helpers._check_resource_in_dataset(resource_id=id, dataset_id=dataset_id, context=context):
         return set()
 
