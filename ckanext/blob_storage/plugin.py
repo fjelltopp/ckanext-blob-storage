@@ -9,6 +9,7 @@ from .blueprints import blueprint
 from .download_handler import download_handler
 from .interfaces import IResourceDownloadHandler
 
+from . import helpers
 
 class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
     plugins.implements(plugins.IConfigurer)
@@ -139,6 +140,11 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
         authorizer.register_authorizer('obj', authz.check_object_permissions,
                                        actions={'update', 'read'},
                                        subscopes=(None, 'data', 'metadata'))
+        # Register custom check_resource_permissions
+        authorizer.register_authorizer('obj', helpers.check_resource_permissions,
+                                       actions={'read'},
+                                       subscopes=(None, 'data', 'metadata'))
+
         authorizer.register_action_alias('write', 'update', 'obj')
         authorizer.register_scope_normalizer('obj', authz.normalize_object_scope)
 
@@ -146,3 +152,12 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
 
     def resource_download(self, resource, package, filename=None, inline=False, activity_id=None):
         return download_handler(resource, package, filename, inline, activity_id)
+
+
+def init_authorizer():
+    authorizer = Authzzie()
+    for plugin in plugins.PluginImplementations(IAuthorizationBindings):
+        if hasattr(plugin, 'register_authz_bindings'):
+            plugin.register_authz_bindings(authorizer)
+
+    return authorizer
