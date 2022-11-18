@@ -141,7 +141,7 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
                                        actions={'update', 'read'},
                                        subscopes=(None, 'data', 'metadata'))
         # Register custom check_resource_permissions
-        authorizer.register_authorizer('obj', helpers.check_resource_permissions,
+        authorizer.register_authorizer('obj', authz.check_resource_permissions,
                                        actions={'read'},
                                        subscopes=(None, 'data', 'metadata'))
 

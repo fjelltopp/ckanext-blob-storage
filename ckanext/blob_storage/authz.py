@@ -5,8 +5,13 @@ import logging
 from ckan.plugins import toolkit
 
 from ckanext.authz_service.authz_binding import resource as resource_authz
-from ckanext.authz_service.authz_binding.common import get_user_context
 from ckanext.authz_service.authzzie import Scope
+
+from ckanext.authz_service.authz_binding.dataset import check_dataset_permissions
+from ckanext.authz_service.authz_binding.common import OptionalCkanContext, check_entity_permissions, get_user_context, \
+    normalize_id_part
+from ckanext.authz_service.authz_binding.resource import RES_ENTITY_CHECKS
+
 
 from . import helpers
 
@@ -105,3 +110,21 @@ def _get_resource_storage_id(organization_id, dataset_id, resource_id, activity_
         return '{}/{}'.format(resource['lfs_prefix'], resource['sha256'])
 
     return '{}/{}/{}'.format(organization_id, dataset_id, resource_id)
+
+
+def check_resource_permissions(id, dataset_id=None, organization_id=None, activity_id=None, context=None):
+    """Check what resource permissions a user has
+    """
+    if dataset_id is None:
+        return set()
+
+    granted = check_dataset_permissions(id=dataset_id, organization_id=organization_id, context=context)
+    if id == '*' or id is None:
+        # Resource permissions for "all resources" can be taken from dataset permissions
+        return granted.intersection(set(RES_ENTITY_CHECKS.keys()))
+
+    if not helpers.find_activity_resource(activity_id, id, dataset_id, context=context) and \
+            not helpers._check_resource_in_dataset(resource_id=id, dataset_id=dataset_id, context=context):
+        return set()
+
+    return check_entity_permissions(RES_ENTITY_CHECKS, {"id": id}, context=context)
