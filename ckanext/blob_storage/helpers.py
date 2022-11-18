@@ -134,19 +134,3 @@ def find_activity_resource(activity_id, resource_id, dataset_id, context) -> (di
     return None, None
 
 
-def check_resource_permissions(id, dataset_id=None, organization_id=None, activity_id=None, context=None):
-    """Check what resource permissions a user has
-    """
-    if dataset_id is None:
-        return set()
-
-    granted = check_dataset_permissions(id=dataset_id, organization_id=organization_id, context=context)
-    if id == '*' or id is None:
-        # Resource permissions for "all resources" can be taken from dataset permissions
-        return granted.intersection(set(RES_ENTITY_CHECKS.keys()))
-
-    if not find_activity_resource(activity_id, id, dataset_id, context=context) and \
-            not _check_resource_in_dataset(resource_id=id, dataset_id=dataset_id, context=context):
-        return set()
-
-    return check_entity_permissions(RES_ENTITY_CHECKS, {"id": id}, context=context)
