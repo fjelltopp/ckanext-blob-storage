@@ -111,7 +111,7 @@ def check_resource_in_dataset(resource_id, dataset_id, context=None):
     return False
 
 
-def find_activity_package_and_resource(activity_id, resource_id, dataset_id, context) -> (dict, dict):
+def find_activity_package_and_resource(activity_id, resource_id, dataset_id, context):
     if not (activity_id and toolkit.check_ckan_version(min_version='2.9')):
         return None, None
 
