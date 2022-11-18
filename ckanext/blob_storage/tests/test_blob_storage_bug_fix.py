@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 @pytest.mark.ckan_config('ckan.plugins', 'unaids versions blob_storage authz_service pages')
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestBlobStorageActivityDownload(object):
-    def test_can_download_resource_whether_it_exist_in_current_version_of_package_or_not(self, app, org_admin):
+    def test_can_download_release_resource_whether_it_exists_in_current_version_of_package_or_not(self, app, org_admin):
 
         org = factories.Organization(user=org_admin)
         context = get_context(org_admin)
