@@ -3,18 +3,13 @@
 from ckan.plugins import toolkit
 from ckan.tests.helpers import call_action
 from ckan.tests import factories
-from ckan.logic import NotAuthorized  # , ValidationError
-import ckan.model as model
 import pytest
 import logging
-from pprint import pformat
-
 from ckanext.auth import logic
-from ckanext.unaids.tests import get_context, create_dataset_with_releases
-from ckanext.unaids.tests.factories import User
+from ckanext.unaids.tests import get_context
 import mock
 import ckan.logic as logic
-from flask import Blueprint, request
+
 log = logging.getLogger(__name__)
 
 
