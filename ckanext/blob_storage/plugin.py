@@ -153,11 +153,3 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
     def resource_download(self, resource, package, filename=None, inline=False, activity_id=None):
         return download_handler(resource, package, filename, inline, activity_id)
 
-
-def init_authorizer():
-    authorizer = Authzzie()
-    for plugin in plugins.PluginImplementations(IAuthorizationBindings):
-        if hasattr(plugin, 'register_authz_bindings'):
-            plugin.register_authz_bindings(authorizer)
-
-    return authorizer
