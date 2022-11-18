@@ -94,7 +94,7 @@ def resource_filename(resource):
     return resource['url']
 
 
-def _check_resource_in_dataset(resource_id, dataset_id, context=None):
+def check_resource_in_dataset(resource_id, dataset_id, context=None):
     # type: (str, str, OptionalCkanContext) -> bool
     """Check that a resource exists in the dataset
     """
