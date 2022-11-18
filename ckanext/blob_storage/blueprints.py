@@ -32,6 +32,8 @@ def download(id, resource_id, filename=None):
         return toolkit.abort(404, toolkit._('Resource not found'))
     except toolkit.NotAuthorized:
         return toolkit.abort(401, toolkit._('Not authorized to read resource {0}'.format(id)))
+    except toolkit.NotFound:
+        toolkit.abort(404, toolkit._(u'Activity not found'))
 
     inline = toolkit.asbool(request.args.get('preview'))
 
