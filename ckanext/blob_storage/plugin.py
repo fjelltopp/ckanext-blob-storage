@@ -9,8 +9,6 @@ from .blueprints import blueprint
 from .download_handler import download_handler
 from .interfaces import IResourceDownloadHandler
 
-from . import helpers
-
 
 class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
     plugins.implements(plugins.IConfigurer)
@@ -33,7 +31,7 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
                 toolkit.get_validator('upload_has_sha256'),
                 toolkit.get_validator('upload_has_size'),
                 toolkit.get_validator('upload_has_lfs_prefix')
-            ],
+                ],
             'sha256': [
                 toolkit.get_validator('ignore_missing'),
                 toolkit.get_validator('valid_sha256')
@@ -59,7 +57,7 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
                 toolkit.get_validator('upload_has_sha256'),
                 toolkit.get_validator('upload_has_size'),
                 toolkit.get_validator('upload_has_lfs_prefix')
-            ],
+                ],
             'sha256': [
                 toolkit.get_validator('ignore_missing'),
                 toolkit.get_validator('valid_sha256')
@@ -111,7 +109,7 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
             'blob_storage_server_url': helpers.server_url,
             'blob_storage_storage_namespace': helpers.storage_namespace,
             'ckan_29_or_higher': plugins.toolkit.check_ckan_version(min_version='2.9.0')
-        }
+          }
 
     # IBlueprint
 
@@ -121,7 +119,6 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
     # IActions
 
     def get_actions(self):
-        authorizer = init_authorizer()
         return {
             'get_resource_download_spec': actions.get_resource_download_spec,
             'resource_schema_show': actions.resource_schema_show,
@@ -142,31 +139,10 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
         authorizer.register_authorizer('obj', authz.check_object_permissions,
                                        actions={'update', 'read'},
                                        subscopes=(None, 'data', 'metadata'))
-
-        authorizer.register_authorizer('obj', helpers.check_resource_permissions,
-                                       actions={'read'},
-                                       subscopes=(None, 'data', 'metadata'))
-
         authorizer.register_action_alias('write', 'update', 'obj')
         authorizer.register_scope_normalizer('obj', authz.normalize_object_scope)
 
+    # IResourceDownloadHandler
+
     def resource_download(self, resource, package, filename=None, inline=False, activity_id=None):
         return download_handler(resource, package, filename, inline, activity_id)
-
-
-def _all_entity_actions(entity_checks):
-    # type: (Dict[str, Optional[str]]) -> Set[Optional[str]]
-    """Get a set of all entity actions
-    """
-    actions = set(entity_checks.keys())
-    actions.add(None)
-    return actions
-
-
-def init_authorizer():
-    authorizer = Authzzie()
-    for plugin in plugins.PluginImplementations(IAuthorizationBindings):
-        if hasattr(plugin, 'register_authz_bindings'):
-            plugin.register_authz_bindings(authorizer)
-
-    return authorizer
