@@ -22,9 +22,11 @@ def download(id, resource_id, filename=None):
     activity_id = request.args.get('activity_id')
 
     try:
-        package, resource = (toolkit.get_action('package_show')(context, {'id': id}), toolkit.get_action('resource_show')(context, {'id': resource_id})) \
-                                if activity_id is None \
-                                else find_activity_package_and_resource(activity_id=activity_id, resource_id=resource_id, dataset_id=id, context=context)
+        if activity_id:
+            package, resource = find_activity_package_and_resource(activity_id, resource_id, id, context)
+        else:
+            package = toolkit.get_action('package_show')(context, {'id': id})
+            resource = toolkit.get_action('resource_show')(context, {'id': resource_id})
 
         if id != resource['package_id']:
             return toolkit.abort(404, toolkit._('Resource not found belonging to package'))
