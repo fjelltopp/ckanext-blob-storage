@@ -8,8 +8,7 @@ from ckanext.authz_service.authz_binding import resource as resource_authz
 from ckanext.authz_service.authzzie import Scope
 
 from ckanext.authz_service.authz_binding.dataset import check_dataset_permissions
-from ckanext.authz_service.authz_binding.common import OptionalCkanContext, check_entity_permissions, get_user_context, \
-    normalize_id_part
+from ckanext.authz_service.authz_binding.common import check_entity_permissions, get_user_context
 from ckanext.authz_service.authz_binding.resource import RES_ENTITY_CHECKS
 
 
