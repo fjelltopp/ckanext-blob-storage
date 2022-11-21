@@ -23,7 +23,7 @@ def download(id, resource_id, filename=None):
 
     try:
         if activity_id:
-            package, resource = find_activity_package_and_resource(activity_id, resource_id, id, context)
+            package, resource = find_activity_package_and_resource(context, activity_id, resource_id, id)
         else:
             package = toolkit.get_action('package_show')(context, {'id': id})
             resource = toolkit.get_action('resource_show')(context, {'id': resource_id})
