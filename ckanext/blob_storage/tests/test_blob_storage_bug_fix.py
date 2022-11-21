@@ -27,7 +27,7 @@ class TestBlobStorageActivityDownload(object):
         activity_before_deleted_resource = activity_list[1]
 
         # # Check if we can download the resource from the version
-        with mock.patch('ckanext.blob_storage.blueprints.call_download_handlers', return_value='') as m:
+        with mock.patch('ckanext.blob_storage.blueprints.call_download_handlers', return_value=''):
             url = toolkit.url_for(
                 'blob_storage.download',
                 id=dataset['id'],
