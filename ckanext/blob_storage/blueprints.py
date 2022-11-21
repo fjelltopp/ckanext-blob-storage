@@ -4,7 +4,7 @@ from ckan.plugins import toolkit
 from flask import Blueprint, request
 
 from .download_handler import call_download_handlers, call_pre_download_handlers, get_context
-from .helpers import find_activity_package_and_resource
+from .helpers import find_activity_package, find_activity_resource
 
 blueprint = Blueprint(
     'blob_storage',
@@ -18,12 +18,16 @@ def download(id, resource_id, filename=None):
     This calls all registered download handlers in order, until
     a response is returned to the user
     """
+    import pydevd_pycharm
+    pydevd_pycharm.settrace('172.17.0.1', port=9000, stdoutToServer=True, stderrToServer=True)
+
     context = get_context()
     activity_id = request.args.get('activity_id')
 
     try:
         if activity_id:
-            package, resource = find_activity_package_and_resource(context, activity_id, resource_id, id)
+            package = find_activity_package(context, activity_id, resource_id, id)
+            resource = find_activity_resource(context, activity_id, resource_id, id)
         else:
             package = toolkit.get_action('package_show')(context, {'id': id})
             resource = toolkit.get_action('resource_show')(context, {'id': resource_id})

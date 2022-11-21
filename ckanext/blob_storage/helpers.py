@@ -109,9 +109,9 @@ def check_resource_in_dataset(resource_id, dataset_id, context=None):
     return False
 
 
-def find_activity_package_and_resource(context, activity_id, resource_id, dataset_id):
+def find_activity_resource(context, activity_id, resource_id, dataset_id):
     if not (activity_id and toolkit.check_ckan_version(min_version='2.9')):
-        return None, None
+        return None
 
     try:
         activity = toolkit.get_action(u'activity_show')(
@@ -124,11 +124,55 @@ def find_activity_package_and_resource(context, activity_id, resource_id, datase
         for r in activity_resources:
             if r['id'] == resource_id:
                 resource = r
-                package = activity_dataset
-                return package, resource
+                return resource
     except AssertionError or toolkit.NotFound:
         pass
 
-    return None, None
+    return None
+
+
+def find_activity_package(context, activity_id, resource_id, dataset_id):
+    if not (activity_id and toolkit.check_ckan_version(min_version='2.9')):
+        return None
+
+    try:
+        activity = toolkit.get_action(u'activity_show')(
+            context, {u'id': activity_id, u'include_data': True})
+        activity_dataset = activity['data']['package']
+
+        assert (activity_dataset['name'] == dataset_id) or (activity_dataset['id'] == dataset_id)
+
+        activity_resources = activity_dataset['resources']
+        for r in activity_resources:
+            if r['id'] == resource_id:
+                package = activity_dataset
+                return package
+    except AssertionError or toolkit.NotFound:
+        pass
+
+    return None
+
+
+# def find_activity_package_and_resource(context, activity_id, resource_id, dataset_id):
+#     if not (activity_id and toolkit.check_ckan_version(min_version='2.9')):
+#         return None, None
+#
+#     try:
+#         activity = toolkit.get_action(u'activity_show')(
+#             context, {u'id': activity_id, u'include_data': True})
+#         activity_dataset = activity['data']['package']
+#
+#         assert (activity_dataset['name'] == dataset_id) or (activity_dataset['id'] == dataset_id)
+#
+#         activity_resources = activity_dataset['resources']
+#         for r in activity_resources:
+#             if r['id'] == resource_id:
+#                 resource = r
+#                 package = activity_dataset
+#                 return package, resource
+#     except AssertionError or toolkit.NotFound:
+#         pass
+#
+#     return None, None
 
 
