@@ -37,7 +37,7 @@ class TestBlobStorageActivityDownload(object):
                 filename="test.csv",
                 preview=1
             )
-
+            # REMOTE_USER is needed to access the resource since resources from old activities are not public
             app.get(url, status=200, extra_environ={'REMOTE_USER': user['name']})
 
 
