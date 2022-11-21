@@ -9,8 +9,6 @@ from .blueprints import blueprint
 from .download_handler import download_handler
 from .interfaces import IResourceDownloadHandler
 
-from . import helpers
-
 class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.ITemplateHelpers)
