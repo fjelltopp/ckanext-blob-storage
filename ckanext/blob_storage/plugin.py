@@ -9,6 +9,7 @@ from .blueprints import blueprint
 from .download_handler import download_handler
 from .interfaces import IResourceDownloadHandler
 
+
 class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.ITemplateHelpers)
@@ -138,7 +139,7 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
         authorizer.register_authorizer('obj', authz.check_object_permissions,
                                        actions={'update', 'read'},
                                        subscopes=(None, 'data', 'metadata'))
-        # Register custom check_resource_permissions
+
         authorizer.register_authorizer('obj', authz.check_resource_permissions,
                                        actions={'read'},
                                        subscopes=(None, 'data', 'metadata'))
