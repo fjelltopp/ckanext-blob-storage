@@ -13,7 +13,8 @@ log = logging.getLogger(__name__)
 
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestBlobStorageActivityDownload(object):
-    def test_can_download_release_resource_whether_it_exists_in_current_version_of_package_or_not(self, app, org_admin):
+    def test_can_download_release_resource_whether_it_exists_in_current_version_of_package_or_not(self, app):
+        org_admin = factories.User()
 
         org = factories.Organization(user=org_admin)
         context = get_context(org_admin)
@@ -58,7 +59,7 @@ class TestBlobStorageActivityDownload(object):
             )
             app.get(url, status=404)
 
-        # Let's get the id of first activity
+        # Let's get the id of second activity stream
         activity_list = toolkit.get_action('package_activity_list')(context, {'id': dataset['id'], 'include_hidden_activity': True})
         # Will give 3 activities
         # activity_list[0] : resource deleted
