@@ -24,11 +24,7 @@ class TestBlobStorageActivityDownload(object):
 
         # Let's get the id of second activity stream
         activity_list = helpers.call_action('package_activity_list', id=dataset['id'], include_hidden_activity=True)
-        # The result will be a list with 3 activities (latest one is at index 0)
-        # activity_list[0] : resource deleted
-        # activity_list[1]: we added the resource
-        # activity_list[2]: we created the package
-        version = activity_list[1]
+        activity_before_deleted_resource = activity_list[1]
 
         # # Check if we can download the resource from the version
         with mock.patch('ckanext.blob_storage.blueprints.call_download_handlers') as m:
@@ -37,7 +33,7 @@ class TestBlobStorageActivityDownload(object):
                 'blob_storage.download',
                 id=dataset['id'],
                 resource_id=resource['id'],
-                activity_id=version['id'],
+                activity_id=activity_before_deleted_resource['id'],
                 filename="test.csv",
                 preview=1
             )
