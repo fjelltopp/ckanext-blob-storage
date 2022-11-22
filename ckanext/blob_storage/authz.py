@@ -115,11 +115,6 @@ def _get_resource_storage_id(organization_id, dataset_id, resource_id, activity_
 def check_resource_permissions(id, dataset_id=None, organization_id=None, activity_id=None, context=None):
     """Check what resource permissions a user has
     """
-
-    import pydevd_pycharm
-    pydevd_pycharm.settrace('172.17.0.1', port=9000, stdoutToServer=True, stderrToServer=True)
-
-
     if dataset_id is None:
         return set()
 
