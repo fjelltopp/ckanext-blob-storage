@@ -1,12 +1,11 @@
 """Tests for plugin.py."""
+import logging
+import mock
+import pytest
+
 # encoding: utf-8
 from ckan.plugins import toolkit
 from ckan.tests import factories, helpers
-import pytest
-import logging
-from ckanext.unaids.tests import get_context
-import mock
-
 
 log = logging.getLogger(__name__)
 
