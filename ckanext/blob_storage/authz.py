@@ -132,7 +132,7 @@ def check_resource_permissions(id, dataset_id=None, organization_id=None, activi
         return granted.intersection(set(RES_ENTITY_CHECKS.keys()))
 
     resource_in_activity_found = False
-    # id might be a concatenation of all resources ids separated with a /
+    # id can be a concatenation of all resources ids separated by a /
     if "/" in id:
         for resource_id in id.split('/'):
             if helpers.find_activity_resource(context, activity_id, resource_id, dataset_id):
