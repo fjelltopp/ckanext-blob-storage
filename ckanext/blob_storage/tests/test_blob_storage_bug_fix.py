@@ -1,9 +1,7 @@
-"""Tests for plugin.py."""
 import logging
 import mock
 import pytest
 
-# encoding: utf-8
 from ckan.plugins import toolkit
 from ckan.tests import factories, helpers
 
@@ -18,14 +16,11 @@ class TestBlobStorageActivityDownload(object):
         dataset = helpers.call_action('package_create', name='dataset_for_bug_test')
         resource = helpers.call_action('resource_create', package_id=dataset["id"])
 
-        # Now delete the resource
         helpers.call_action('resource_delete', id=resource['id'])
 
-        # Let's get the id of second activity stream
         activity_list = helpers.call_action('package_activity_list', id=dataset['id'], include_hidden_activity=True)
         activity_before_deleted_resource = activity_list[1]
 
-        # # Check if we can download the resource from the version
         with mock.patch('ckanext.blob_storage.blueprints.call_download_handlers', return_value=''):
             url = toolkit.url_for(
                 'blob_storage.download',
