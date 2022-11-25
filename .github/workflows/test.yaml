@@ -28,19 +28,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ckan-container-version: "2.9.7-py2"
+          - ckan-container-version: "2.9-py2"
             ckan-postgres-version: "2.9"
             ckan-solr-version: "2.9-solr8"
             ckan-requirements: "requirements.py2.txt"
-          - ckan-container-version: "2.9.7"
+          - ckan-container-version: "2.9"
             ckan-postgres-version: "2.9"
             ckan-solr-version: "2.9-solr8"
             ckan-requirements: "requirements.py3.txt"
-            # package_activity_list not found in ckan 2.10 ?
-#          - ckan-container-version: "2.10"
-#            ckan-postgres-version: "2.10"
-#            ckan-solr-version: "2.10"
-#            ckan-requirements: "requirements.py3.txt"
 
     container:
       image: openknowledge/ckan-dev:${{ matrix.ckan-container-version }}
@@ -71,11 +66,11 @@ jobs:
         pip install -r ${{ matrix.ckan-requirements }}
         pip install -r dev-${{ matrix.ckan-requirements }}
         pip install mock
-        # pip install git+https://github.com/fjelltopp/ckanext-emailasusername.git@development#egg=ckanext-emailasusername
         pip install git+https://github.com/datopian/ckanext-authz-service.git@master#egg=ckanext-authz-service
         pip install -e .
         # Replace default path to CKAN core config file with the one on the container
         sed -i -e 's/use = config:.*/use = config:\/srv\/app\/src\/ckan\/test-core.ini/' test.ini
+        cat test.ini
     - name: Setup extension
       run: |
         ckan -c test.ini db init
