@@ -28,11 +28,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ckan-container-version: "2.9-py2"
+          - ckan-container-version: "2.9.7-py2"
             ckan-postgres-version: "2.9"
             ckan-solr-version: "2.9-solr8"
             ckan-requirements: "requirements.py2.txt"
-          - ckan-container-version: "2.9"
+          - ckan-container-version: "2.9.7"
             ckan-postgres-version: "2.9"
             ckan-solr-version: "2.9-solr8"
             ckan-requirements: "requirements.py3.txt"
