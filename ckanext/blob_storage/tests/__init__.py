@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from typing import Any, Dict
+from typing import Any, Dict  # noqa: F401
 
 from ckan import model
 from ckan.tests import helpers

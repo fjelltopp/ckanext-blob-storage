@@ -2,7 +2,7 @@
 """
 import ast
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional  # noqa: F401
 
 from ckan.plugins import toolkit
 from giftless_client import LfsClient
