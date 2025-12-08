@@ -28,8 +28,9 @@ mccabe==0.6.1
     # via flake8
 mock==5.2.0
     # via -r dev-requirements.in
-packaging==20.3
+packaging==25.0
     # via
+    #   -r dev-requirements.in
     #   build
     #   pytest
 pip-tools==7.5.2
@@ -40,8 +41,6 @@ pycodestyle==2.5.0
     # via flake8
 pyflakes==2.1.1
     # via flake8
-pyparsing==2.4.7
-    # via packaging
 pyproject-hooks==1.2.0
     # via
     #   build
@@ -62,9 +61,7 @@ pytest-flake8==1.0.5
 pytest-isort==0.3.1
     # via -r dev-requirements.in
 six==1.14.0
-    # via
-    #   ckantoolkit
-    #   packaging
+    # via ckantoolkit
 wheel==0.45.1
     # via pip-tools
 zipp==3.1.0
