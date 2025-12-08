@@ -1,6 +1,6 @@
 """CKAN plugin interface
 """
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional  # noqa: F401
 
 from ckan.plugins import Interface
 
