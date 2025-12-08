@@ -1,4 +1,4 @@
-pip-tools
+pip-tools>=7.0
 pytest>=7.4,<9
 pytest-ckan==0.0.*
 pytest-cov>=4.0
