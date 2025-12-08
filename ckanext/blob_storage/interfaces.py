@@ -1,7 +1,5 @@
 """CKAN plugin interface
 """
-from typing import Any, Dict, Optional
-
 from ckan.plugins import Interface
 
 

@@ -83,11 +83,11 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points='''
         [ckan.plugins]
-        blob_storage=ckanext.blob_storage.plugin:BlobStoragePlugin 
+        blob_storage=ckanext.blob_storage.plugin:BlobStoragePlugin
 
         [babel.extractors]
         ckan = ckan.lib.extract:extract_ckan
-        
+
         [paste.paster_command]
         migrate-resources = ckanext.blob_storage.cli:MigrateResourcesCommand
     ''',

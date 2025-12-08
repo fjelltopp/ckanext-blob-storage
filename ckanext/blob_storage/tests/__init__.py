@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-from typing import Any, Dict
 
 from ckan import model
 from ckan.tests import helpers

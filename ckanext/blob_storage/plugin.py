@@ -1,7 +1,6 @@
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 
-from ckanext.authz_service.authzzie import Authzzie
 from ckanext.authz_service.interfaces import IAuthorizationBindings
 
 from . import actions, authz, helpers, validators
