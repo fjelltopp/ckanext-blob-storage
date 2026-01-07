@@ -501,6 +501,33 @@ FAILED ckanext/blob_storage/tests/test_actions.py::test_validation_error_if_size
 **Result:**
 ✅ FIXED - test_validation_error_if_size_not_positive_integer now properly tests positive integer validation
 
+### Issue 17: test_validation_error_if_empty_lfs_prefix using factories instead of call_action
+
+**Error Message:**
+```
+FAILED ckanext/blob_storage/tests/test_actions.py::test_validation_error_if_empty_lfs_prefix - Failed: DID NOT RAISE <class 'ckan.logic.ValidationError'>
+```
+
+**Root Cause:**
+- Same pattern as Issues 12-16 - test was using `factories.Dataset()` which bypasses validation
+- The test expects a ValidationError when 'lfs_prefix' field is an empty string
+- The `valid_lfs_prefix` validator in validators.py checks if lfs_prefix is not empty
+- Factories skip the validation chain, so the validator is never executed
+
+**Solution Applied:**
+1. Changed `test_validation_error_if_empty_lfs_prefix` to use `helpers.call_action('package_create', ...)`
+2. Added `with_plugins` fixture to ensure plugin is loaded during test
+3. Created user and organization using factories (correct use - for test setup/fixtures)
+4. Passed context with authenticated user
+5. Used unique dataset name 'test-dataset-empty-lfs-prefix' to avoid conflicts
+6. Added comment explaining the empty lfs_prefix is intentional
+
+**Files Modified:**
+- `ckanext/blob_storage/tests/test_actions.py`: Lines 163-181 - Converted test to use call_action instead of factories.Dataset
+
+**Result:**
+✅ FIXED - test_validation_error_if_empty_lfs_prefix now properly tests non-empty lfs_prefix validation
+
 ---
 
 ## Summary of Migration Issues

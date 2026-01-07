@@ -163,17 +163,24 @@ def test_validation_error_if_size_not_positive_integer():
         )
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures("clean_db", "with_plugins")
 def test_validation_error_if_empty_lfs_prefix():
+    user = factories.User()
+    org = factories.Organization(user=user)
+    
     with pytest.raises(toolkit.ValidationError):
-        factories.Dataset(
+        helpers.call_action(
+            'package_create',
+            context={'user': user['name']},
+            name='test-dataset-empty-lfs-prefix',
+            owner_org=org['id'],
             resources=[
                 {
                     'url': '/my/file.csv',
                     'url_type': 'upload',
                     'sha256': 'cc71500070cf26cd6e8eab7c9eec3a937be957d144f445ad24003157e2bd0919',
                     'size': 123456,
-                    'lfs_prefix': ''
+                    'lfs_prefix': ''  # Empty lfs_prefix to trigger validation error
                 }
             ]
         )
