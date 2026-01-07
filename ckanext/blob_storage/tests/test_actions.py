@@ -1,18 +1,26 @@
 import ckan.plugins.toolkit as toolkit
 import pytest
-from ckan.tests import factories
+from ckan.tests import factories, helpers
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures("clean_db", "with_plugins")
 def test_validation_error_if_not_sha256():
+    user = factories.User()
+    org = factories.Organization(user=user)
+    
     with pytest.raises(toolkit.ValidationError):
-        factories.Dataset(
+        helpers.call_action(
+            'package_create',
+            context={'user': user['name']},
+            name='test-dataset',
+            owner_org=org['id'],
             resources=[
                 {
                     'url': '/my/file.csv',
                     'url_type': 'upload',
                     'size': 12345,
                     'lfs_prefix': 'lfs/prefix'
+                    # sha256 is intentionally missing to trigger validation error
                 }
             ]
         )
