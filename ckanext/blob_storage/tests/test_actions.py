@@ -121,29 +121,42 @@ def test_validation_error_if_wrong_sha256():
         )
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures("clean_db", "with_plugins")
 def test_validation_error_if_size_not_positive_integer():
+    user = factories.User()
+    org = factories.Organization(user=user)
+    
+    # Test case 1: negative size
     with pytest.raises(toolkit.ValidationError):
-        factories.Dataset(
+        helpers.call_action(
+            'package_create',
+            context={'user': user['name']},
+            name='test-dataset-negative-size',
+            owner_org=org['id'],
             resources=[
                 {
                     'url': '/my/file.csv',
                     'url_type': 'upload',
                     'sha256': 'cc71500070cf26cd6e8eab7c9eec3a937be957d144f445ad24003157e2bd0919',
-                    'size': -12,
+                    'size': -12,  # Negative size to trigger validation error
                     'lfs_prefix': 'lfs/prefix'
                 }
             ]
         )
 
+    # Test case 2: zero size
     with pytest.raises(toolkit.ValidationError):
-        factories.Dataset(
+        helpers.call_action(
+            'package_create',
+            context={'user': user['name']},
+            name='test-dataset-zero-size',
+            owner_org=org['id'],
             resources=[
                 {
                     'url': '/my/file.csv',
                     'url_type': 'upload',
                     'sha256': 'cc71500070cf26cd6e8eab7c9eec3a937be957d144f445ad24003157e2bd0919',
-                    'size': 0,
+                    'size': 0,  # Zero size to trigger validation error
                     'lfs_prefix': 'lfs/prefix'
                 }
             ]

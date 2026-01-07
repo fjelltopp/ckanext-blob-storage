@@ -470,6 +470,37 @@ FAILED ckanext/blob_storage/tests/test_actions.py::test_validation_error_if_wron
 **Result:**
 ✅ FIXED - test_validation_error_if_wrong_sha256 now properly tests sha256 format validation
 
+### Issue 16: test_validation_error_if_size_not_positive_integer using factories instead of call_action
+
+**Error Message:**
+```
+FAILED ckanext/blob_storage/tests/test_actions.py::test_validation_error_if_size_not_positive_integer - Failed: DID NOT RAISE <class 'ckan.logic.ValidationError'>
+```
+
+**Root Cause:**
+- Same pattern as Issues 12-15 - test was using `factories.Dataset()` which bypasses validation
+- The test has 2 test cases expecting ValidationError when size is not a positive integer:
+  - Test case 1: negative size (-12)
+  - Test case 2: zero size (0)
+- The `is_positive_integer` validator in validators.py checks if size is > 0
+- Factories skip the validation chain, so the validator is never executed
+
+**Solution Applied:**
+1. Changed `test_validation_error_if_size_not_positive_integer` to use `helpers.call_action('package_create', ...)`
+2. Added `with_plugins` fixture to ensure plugin is loaded during test
+3. Created user and organization using factories (correct use - for test setup/fixtures)
+4. Passed context with authenticated user
+5. Converted both test cases to use call_action:
+   - Test case 1: unique dataset name 'test-dataset-negative-size' with size=-12
+   - Test case 2: unique dataset name 'test-dataset-zero-size' with size=0
+6. Added comments explaining the invalid size values are intentional
+
+**Files Modified:**
+- `ckanext/blob_storage/tests/test_actions.py`: Lines 124-161 - Converted both test cases to use call_action instead of factories.Dataset
+
+**Result:**
+✅ FIXED - test_validation_error_if_size_not_positive_integer now properly tests positive integer validation
+
 ---
 
 ## Summary of Migration Issues
