@@ -26,16 +26,24 @@ def test_validation_error_if_not_sha256():
         )
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures("clean_db", "with_plugins")
 def test_validation_error_if_not_size_on_uploads():
+    user = factories.User()
+    org = factories.Organization(user=user)
+    
     with pytest.raises(toolkit.ValidationError):
-        factories.Dataset(
+        helpers.call_action(
+            'package_create',
+            context={'user': user['name']},
+            name='test-dataset-size',
+            owner_org=org['id'],
             resources=[
                 {
                     'url': '/my/file.csv',
                     'url_type': 'upload',
                     'sha256': 'cc71500070cf26cd6e8eab7c9eec3a937be957d144f445ad24003157e2bd0919',
                     'lfs_prefix': 'lfs/prefix'
+                    # size is intentionally missing to trigger validation error
                 }
             ]
         )

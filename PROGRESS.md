@@ -388,6 +388,34 @@ FAILED ckanext/blob_storage/tests/test_actions.py::test_validation_error_if_not_
 **Result:**
 ✅ FIXED - test_validation_error_if_not_sha256 now passes
 
+### Issue 13: test_validation_error_if_not_size_on_uploads using factories instead of call_action
+
+**Error Message:**
+```
+FAILED ckanext/blob_storage/tests/test_actions.py::test_validation_error_if_not_size_on_uploads - Failed: DID NOT RAISE <class 'ckan.logic.ValidationError'>
+```
+
+**Root Cause:**
+- Same issue as Issue 12 - test was using `factories.Dataset()` which bypasses validation
+- The test expects a ValidationError when 'size' field is missing from an upload resource
+- Validators were properly registered and working, but factories skip the validation chain entirely
+- The `upload_has_size` validator in validators.py checks if size field exists for uploads
+- However, factories bypass the entire action layer, so validators never execute
+
+**Solution Applied:**
+1. Changed `test_validation_error_if_not_size_on_uploads` to use `helpers.call_action('package_create', ...)`
+2. Added `with_plugins` fixture to ensure plugin is loaded during test
+3. Created user and organization using factories (correct use - for test setup/fixtures)
+4. Passed context with authenticated user
+5. Used unique dataset name 'test-dataset-size' to avoid conflicts
+6. Added comment explaining the missing 'size' field is intentional
+
+**Files Modified:**
+- `ckanext/blob_storage/tests/test_actions.py`: Lines 29-47 - Converted test to use call_action instead of factories.Dataset
+
+**Result:**
+✅ FIXED - test_validation_error_if_not_size_on_uploads now properly tests size validation
+
 ---
 
 ## Summary of Migration Issues
