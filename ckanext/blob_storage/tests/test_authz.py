@@ -13,7 +13,7 @@ def test_normalize_object_scope():
     assert 'foo:bar:read' == str(normalized_scope)
 
 
-@pytest.mark.usefixtures('clean_db', 'reset_db', 'with_request_context')
+@pytest.mark.usefixtures('clean_db_with_migrations', 'reset_db', 'with_request_context')
 def test_normalize_object_scope_with_lfs():
     sysadmin = factories.Sysadmin()
     org = factories.Organization()
