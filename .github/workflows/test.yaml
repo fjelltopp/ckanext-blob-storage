@@ -75,10 +75,10 @@ jobs:
           # 4. test_validation_error_if_wrong_sha256 (FIXED)
           # 5. test_validation_error_if_size_not_positive_integer (FIXED)
           # 6. test_validation_error_if_empty_lfs_prefix (FIXED)
-          # 7. test_normalize_object_scope_with_activity_id
-          # 8. test_can_download_release_resource_whether_it_exists_in_current_version_of_package_or_not (commented)
+          # 7. test_normalize_object_scope_with_activity_id (FIXED)
+          # 8. test_can_download_release_resource_whether_it_exists_in_current_version_of_package_or_not (FIXED)
           pytest --ckan-ini=test.ini --cov=ckanext.blob_storage --cov-report=xml --cov-append --disable-warnings -vv -p no:xdist \
-            ckanext/blob_storage/tests/test_authz.py::test_normalize_object_scope_with_activity_id
+            ckanext/blob_storage/tests/
 
       - name: Upload coverage report to codecov
         continue-on-error: true

@@ -8,15 +8,14 @@ from ckan.tests import factories, helpers
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.usefixtures('clean_db', 'with_plugins')
+@pytest.mark.usefixtures('clean_db_with_migrations', 'with_plugins')
 class TestBlobStorageActivityDownload(object):
     def test_can_download_release_resource_whether_it_exists_in_current_version_of_package_or_not(self, app):
-
         user = factories.User()
-        dataset = helpers.call_action('package_create', name='dataset_for_bug_test')
-        resource = helpers.call_action('resource_create', package_id=dataset["id"])
+        dataset = helpers.call_action('package_create', context={'user': user['name']}, name='dataset_for_bug_test')
+        resource = helpers.call_action('resource_create', context={'user': user['name']}, package_id=dataset["id"])
 
-        helpers.call_action('resource_delete', id=resource['id'])
+        helpers.call_action('resource_delete', context={'user': user['name']}, id=resource['id'])
 
         activity_list = helpers.call_action('package_activity_list', id=dataset['id'], include_hidden_activity=True)
         activity_before_deleted_resource = activity_list[1]

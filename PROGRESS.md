@@ -672,11 +672,40 @@ This issue had two sub-problems that needed to be solved sequentially:
 **Result:**
 ✅ COMPLETE - Test code cleaned up and ready for commit
 
+### Issue 18: test_can_download_release_resource missing context parameter in action calls
+
+**Error Message:**
+```
+FAILED ckanext/blob_storage/tests/test_blob_storage_bug_fix.py::TestBlobStorageActivityDownload::test_can_download_release_resource_whether_it_exists_in_current_version_of_package_or_not - ckan.logic.ValidationError: None - {'user_id': ['User not found']}
+username = '127.0.0.1'
+```
+
+**Root Cause:**
+- Test was calling `helpers.call_action('package_create', ...)` without a context parameter
+- Same issue with `resource_create` and `resource_delete` calls
+- In CKAN 2.11 with the activity plugin enabled, all actions that trigger activities require authentication
+- Without a context, `helpers.call_action()` defaults to an anonymous context with user='127.0.0.1'
+- The activity plugin tries to look up this "user" and fails with ValidationError
+
+**Solution Applied:**
+1. Added `context={'user': user['name']}` to `package_create` call
+2. Added `context={'user': user['name']}` to `resource_create` call
+3. Added `context={'user': user['name']}` to `resource_delete` call
+4. Changed fixture from `clean_db` to `clean_db_with_migrations` to ensure activity plugin schema is set up
+
+**Files Modified:**
+- `ckanext/blob_storage/tests/test_blob_storage_bug_fix.py`: 
+  - Line 11 - Changed from `clean_db` to `clean_db_with_migrations`
+  - Lines 14-19 - Added context parameter to all three action calls
+
+**Result:**
+✅ FIXED - test_can_download_release_resource now passes with proper authentication
+
 ---
 
 ## Summary of Migration Issues
 
-### Successfully Fixed (Issues 1-17):
+### Successfully Fixed (Issues 1-18):
 1. ✅ Circular import in setup.py
 2. ✅ Dependency version conflicts
 3. ✅ Removed recline_view plugin
@@ -694,9 +723,10 @@ This issue had two sub-problems that needed to be solved sequentially:
 15. ✅ test_validation_error_if_wrong_sha256 - converted to use call_action
 16. ✅ test_normalize_object_scope_with_activity_id - missing context parameter
 17. ✅ activity.permission_labels column has wrong data type (text vs text[])
+18. ✅ test_can_download_release_resource - missing context parameter in action calls
 
 ### All Tests Passing:
-✅ All 7 originally failing tests now pass
+✅ All 8 originally failing tests now pass
 ✅ Debug code cleaned up
 ✅ Ready for commit
 
