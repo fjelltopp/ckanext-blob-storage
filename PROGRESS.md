@@ -443,6 +443,33 @@ FAILED ckanext/blob_storage/tests/test_actions.py::test_validation_error_if_not_
 **Result:**
 ✅ FIXED - test_validation_error_if_not_lfs_prefix_on_uploads now properly tests lfs_prefix validation
 
+### Issue 15: test_validation_error_if_wrong_sha256 using factories instead of call_action
+
+**Error Message:**
+```
+FAILED ckanext/blob_storage/tests/test_actions.py::test_validation_error_if_wrong_sha256 - Failed: DID NOT RAISE <class 'ckan.logic.ValidationError'>
+```
+
+**Root Cause:**
+- Same pattern as Issues 12-14 - test was using `factories.Dataset()` which bypasses validation
+- The test expects a ValidationError when 'sha256' field has an invalid format (not a 64-character hex string)
+- The `valid_sha256` validator in validators.py checks if sha256 is a valid hex string of exactly 64 characters
+- Factories skip the validation chain, so the validator is never executed
+
+**Solution Applied:**
+1. Changed `test_validation_error_if_wrong_sha256` to use `helpers.call_action('package_create', ...)`
+2. Added `with_plugins` fixture to ensure plugin is loaded during test
+3. Created user and organization using factories (correct use - for test setup/fixtures)
+4. Passed context with authenticated user
+5. Used unique dataset name 'test-dataset-wrong-sha256' to avoid conflicts
+6. Added comment explaining the invalid sha256 format is intentional
+
+**Files Modified:**
+- `ckanext/blob_storage/tests/test_actions.py`: Lines 101-120 - Converted test to use call_action instead of factories.Dataset
+
+**Result:**
+✅ FIXED - test_validation_error_if_wrong_sha256 now properly tests sha256 format validation
+
 ---
 
 ## Summary of Migration Issues

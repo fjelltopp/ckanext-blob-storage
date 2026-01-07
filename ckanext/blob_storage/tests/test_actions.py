@@ -98,15 +98,22 @@ def test_no_validation_error_if_all_fields_are_set():
     assert dataset['resources'][0]['lfs_prefix'] == 'lfs/prefix'
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures("clean_db", "with_plugins")
 def test_validation_error_if_wrong_sha256():
+    user = factories.User()
+    org = factories.Organization(user=user)
+    
     with pytest.raises(toolkit.ValidationError):
-        factories.Dataset(
+        helpers.call_action(
+            'package_create',
+            context={'user': user['name']},
+            name='test-dataset-wrong-sha256',
+            owner_org=org['id'],
             resources=[
                 {
                     'url': '/my/file.csv',
                     'url_type': 'upload',
-                    'sha256': 'wrong_sha256',
+                    'sha256': 'wrong_sha256',  # Invalid sha256 format to trigger validation error
                     'size': 123456,
                     'lfs_prefix': 'lfs/prefix'
                 }
