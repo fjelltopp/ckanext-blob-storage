@@ -1,9 +1,9 @@
 from contextlib import contextmanager
 from typing import Any, Dict  # noqa: F401
+from unittest.mock import patch
 
 from ckan import model
 from ckan.tests import helpers
-from mock import patch
 
 
 class FunctionalTestBase(helpers.FunctionalTestBase):
