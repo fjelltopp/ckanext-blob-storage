@@ -56,7 +56,10 @@ class DummyUploader(object):
                 package_id=package_id,
                 filename=self.resource.get('name')
             )
-        # Fallback: return None (will cause an error, but better than silent failure)
+        # Log the issue for debugging
+        import logging
+        log = logging.getLogger(__name__)
+        log.error(f"Cannot redirect for resource {id}: missing package_id")
         return None
 
     def upload(self, id, max_size):

@@ -13,12 +13,17 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 # Read version from __init__.py without importing
 def get_version():
     init_path = path.join(here, 'ckanext', 'blob_storage', '__init__.py')
-    with open(init_path, encoding='utf-8') as f:
-        content = f.read()
-        version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", content, re.M)
-        if version_match:
-            return version_match.group(1)
-        raise RuntimeError("Unable to find version string.")
+    try:
+        with open(init_path, encoding='utf-8') as f:
+            content = f.read()
+            version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", content, re.M)
+            if version_match:
+                return version_match.group(1)
+            raise RuntimeError("Unable to find version string in __init__.py")
+    except FileNotFoundError:
+        raise RuntimeError(f"Unable to find {init_path}")
+    except Exception as e:
+        raise RuntimeError(f"Error reading version from {init_path}: {e}")
 
 version = get_version()
 

@@ -44,7 +44,7 @@ def test_normalize_object_scope_with_lfs():
 def test_normalize_object_scope_with_activity_id():
     if not toolkit.check_ckan_version(min_version="2.9"):
         pytest.skip("activity_id feature only available in CKAN 2.9+")
-    
+
     sysadmin = factories.Sysadmin()
     org = factories.Organization()
     dataset = factories.Dataset(owner_org=org['id'])
@@ -81,7 +81,7 @@ def test_normalize_object_scope_with_activity_id():
     assert expected_scope == str(normalized_scope)
 
     # Editing the resource so the latest version is different from resource_2
-    resource_3 = helpers.call_action(
+    helpers.call_action(
         'resource_patch',
         context={'user': sysadmin['name']},
         id=resource['id'],
