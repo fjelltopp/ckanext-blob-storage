@@ -56,7 +56,7 @@ def test_normalize_object_scope_with_activity_id():
         lfs_prefix='lfs_prefix',
         package_id=dataset['id']
     )
-    
+
     resource_2 = helpers.call_action(
         'resource_patch',
         context={'user': sysadmin['name']},

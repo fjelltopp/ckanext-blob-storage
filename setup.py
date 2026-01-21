@@ -10,6 +10,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+
 # Read version from __init__.py without importing
 def get_version():
     init_path = path.join(here, 'ckanext', 'blob_storage', '__init__.py')
@@ -24,6 +25,7 @@ def get_version():
         raise RuntimeError(f"Unable to find {init_path}")
     except Exception as e:
         raise RuntimeError(f"Error reading version from {init_path}: {e}")
+
 
 version = get_version()
 

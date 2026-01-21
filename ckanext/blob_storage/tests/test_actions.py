@@ -7,7 +7,7 @@ from ckan.tests import factories, helpers
 def test_validation_error_if_not_sha256():
     user = factories.User()
     org = factories.Organization(user=user)
-    
+
     with pytest.raises(toolkit.ValidationError):
         helpers.call_action(
             'package_create',
@@ -30,7 +30,7 @@ def test_validation_error_if_not_sha256():
 def test_validation_error_if_not_size_on_uploads():
     user = factories.User()
     org = factories.Organization(user=user)
-    
+
     with pytest.raises(toolkit.ValidationError):
         helpers.call_action(
             'package_create',
@@ -53,7 +53,7 @@ def test_validation_error_if_not_size_on_uploads():
 def test_validation_error_if_not_lfs_prefix_on_uploads():
     user = factories.User()
     org = factories.Organization(user=user)
-    
+
     with pytest.raises(toolkit.ValidationError):
         helpers.call_action(
             'package_create',
@@ -102,7 +102,7 @@ def test_no_validation_error_if_all_fields_are_set():
 def test_validation_error_if_wrong_sha256():
     user = factories.User()
     org = factories.Organization(user=user)
-    
+
     with pytest.raises(toolkit.ValidationError):
         helpers.call_action(
             'package_create',
@@ -125,7 +125,7 @@ def test_validation_error_if_wrong_sha256():
 def test_validation_error_if_size_not_positive_integer():
     user = factories.User()
     org = factories.Organization(user=user)
-    
+
     # Test case 1: negative size
     with pytest.raises(toolkit.ValidationError):
         helpers.call_action(
@@ -167,7 +167,7 @@ def test_validation_error_if_size_not_positive_integer():
 def test_validation_error_if_empty_lfs_prefix():
     user = factories.User()
     org = factories.Organization(user=user)
-    
+
     with pytest.raises(toolkit.ValidationError):
         helpers.call_action(
             'package_create',
