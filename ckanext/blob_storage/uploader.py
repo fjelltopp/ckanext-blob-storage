@@ -1,4 +1,5 @@
 from ckan.plugins import toolkit
+from flask import request
 from werkzeug.exceptions import HTTPException
 
 
@@ -18,8 +19,13 @@ class BlobStorageRedirectException(HTTPException):
 
     def get_response(self, environ=None):
         from flask import redirect
+        # Extract package_type from the current request path
+        # Path format: /<package_type>/<id>/resource/<resource_id>/download/...
+        path_parts = request.path.strip('/').split('/')
+        package_type = path_parts[0] if path_parts else 'dataset'
         url = toolkit.url_for(
             'blob_storage.download',
+            package_type=package_type,
             id=self.package_id,
             resource_id=self.resource_id,
             filename=self.filename
