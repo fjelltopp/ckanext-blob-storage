@@ -52,5 +52,6 @@ def download(id, resource_id, filename=None, package_type=None):
 
 
 # Routes for any package type (dataset, dataset-2, etc.)
-blueprint.add_url_rule(u'/<package_type>/<id>/resource/<resource_id>/download', view_func=download)
+# strict_slashes=False allows matching with or without trailing slash
+blueprint.add_url_rule(u'/<package_type>/<id>/resource/<resource_id>/download', view_func=download, strict_slashes=False)
 blueprint.add_url_rule(u'/<package_type>/<id>/resource/<resource_id>/download/<filename>', view_func=download)
