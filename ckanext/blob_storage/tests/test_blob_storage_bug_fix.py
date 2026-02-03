@@ -23,6 +23,7 @@ class TestBlobStorageActivityDownload(object):
         with mock.patch('ckanext.blob_storage.blueprints.call_download_handlers', return_value=''):
             url = toolkit.url_for(
                 'blob_storage.download',
+                package_type='dataset',
                 id=dataset['id'],
                 resource_id=resource['id'],
                 activity_id=activity_before_deleted_resource['id'],

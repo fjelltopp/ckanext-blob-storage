@@ -23,6 +23,7 @@ def test_preview_arg(app):
 
         url = toolkit.url_for(
             'blob_storage.download',
+            package_type='dataset',
             id=dataset['id'],
             resource_id=resource['id'],
             preview=1
@@ -39,6 +40,7 @@ def test_preview_arg(app):
 
         url = toolkit.url_for(
             'blob_storage.download',
+            package_type='dataset',
             id=dataset['id'],
             resource_id=resource['id'],
             filename='test.csv',
@@ -54,6 +56,7 @@ def test_preview_arg(app):
 
         url = toolkit.url_for(
             'blob_storage.download',
+            package_type='dataset',
             id=dataset['id'],
             resource_id=resource['id'],
             filename='test.csv',

@@ -39,11 +39,54 @@ class TestBlobStorageRedirectException:
         assert exc.package_id == 'pkg-456'
         assert exc.filename is None
 
-    @mock.patch('ckanext.blob_storage.uploader.toolkit')
+    @mock.patch('giftless_client.LfsClient')
+    @mock.patch('ckanext.blob_storage.actions.get_download_authz_token')
+    @mock.patch('ckanext.blob_storage.helpers.server_url')
+    @mock.patch('ckanext.blob_storage.helpers.resource_filename')
+    @mock.patch('ckan.plugins.toolkit.get_action')
     @mock.patch('flask.redirect')
-    def test_get_response_creates_redirect(self, mock_redirect, mock_toolkit):
-        """get_response() should create a redirect to blob_storage.download."""
-        mock_toolkit.url_for.return_value = '/dataset/pkg-456/resource/res-123/download/data.csv'
+    def test_get_response_creates_redirect(
+        self, mock_redirect, mock_get_action, mock_resource_filename,
+        mock_server_url, mock_get_authz_token, mock_lfs_client_class
+    ):
+        """get_response() should fetch LFS URL and redirect to blob storage."""
+        # Setup mocks
+        mock_resource = {
+            'id': 'res-123',
+            'sha256': 'abc123',
+            'size': 1000,
+            'lfs_prefix': 'org/dataset'
+        }
+        mock_package = {
+            'id': 'pkg-456',
+            'name': 'my-dataset',
+            'organization': {'name': 'my-org'}
+        }
+
+        def mock_action(action_name):
+            def action_fn(context, data):
+                if action_name == 'resource_show':
+                    return mock_resource
+                elif action_name == 'package_show':
+                    return mock_package
+            return action_fn
+
+        mock_get_action.side_effect = mock_action
+        mock_get_authz_token.return_value = 'auth-token-xyz'
+        mock_server_url.return_value = 'https://lfs.example.com'
+        mock_resource_filename.return_value = 'data.csv'
+
+        # Setup LFS client mock
+        mock_lfs_client = mock.MagicMock()
+        mock_lfs_client_class.return_value = mock_lfs_client
+        mock_lfs_client.batch.return_value = {
+            'objects': [{
+                'actions': {
+                    'download': {'href': 'https://blob.storage.azure.net/file?sas=token'}
+                }
+            }]
+        }
+
         mock_redirect.return_value = 'redirect_response'
 
         exc = BlobStorageRedirectException(
@@ -54,17 +97,14 @@ class TestBlobStorageRedirectException:
 
         response = exc.get_response()
 
-        # Verify url_for was called with correct arguments
-        mock_toolkit.url_for.assert_called_once_with(
-            'blob_storage.download',
-            id='pkg-456',
-            resource_id='res-123',
-            filename='data.csv'
+        # Verify LFS client was created with correct server and token
+        mock_lfs_client_class.assert_called_once_with(
+            'https://lfs.example.com', 'auth-token-xyz'
         )
 
-        # Verify redirect was called with the URL
+        # Verify redirect was called with the LFS download URL
         mock_redirect.assert_called_once_with(
-            '/dataset/pkg-456/resource/res-123/download/data.csv'
+            'https://blob.storage.azure.net/file?sas=token'
         )
 
         assert response == 'redirect_response'
