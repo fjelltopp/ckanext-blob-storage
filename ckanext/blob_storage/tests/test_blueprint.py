@@ -4,6 +4,14 @@ from ckan.plugins import toolkit
 from ckan.tests import factories
 
 
+# In CKAN 2.11+, the core /dataset/.../download route takes precedence over
+# blob_storage's /<package_type>/.../download route due to Flask preferring
+# literal path segments over variables. The blob_storage download functionality
+# is instead provided via DummyUploader.get_path() raising BlobStorageRedirectException.
+@pytest.mark.skipif(
+    toolkit.check_ckan_version(min_version='2.11'),
+    reason="CKAN 2.11+ uses uploader mechanism instead of blob_storage route for /dataset/ URLs"
+)
 @pytest.mark.usefixtures('clean_db')
 def test_preview_arg(app):
 
