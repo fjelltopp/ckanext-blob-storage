@@ -62,7 +62,9 @@ def get_lfs_download_spec(context,  # type: Dict[str, Any]
         package['name'],
         resource['id'],
         activity_id=activity_id)
-    client = context.get('download_lfs_client', LfsClient(helpers.server_url(), authz_token))
+    # Always create a new LfsClient with the correct token for this specific resource
+    # to avoid token mismatch issues and race conditions in multi-threaded environments
+    client = LfsClient(helpers.server_url(), authz_token)
 
     resources = [{"oid": sha256, "size": size, "x-filename": filename}]
 
