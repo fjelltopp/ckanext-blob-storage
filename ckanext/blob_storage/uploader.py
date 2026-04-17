@@ -1,4 +1,8 @@
+import logging
+
 from werkzeug.exceptions import HTTPException
+
+log = logging.getLogger(__name__)
 
 
 class BlobStorageRedirectException(HTTPException):
@@ -20,12 +24,17 @@ class BlobStorageRedirectException(HTTPException):
         # Fetch LFS download URL directly and redirect to blob storage
         # This avoids the redirect loop with CKAN's routes
         from flask import redirect, Response
+        from flask_login import current_user
         from ckan import model
         from ckan.plugins import toolkit
         from . import helpers
         from .actions import get_download_authz_token
 
-        context = {"model": model, "ignore_auth": True}
+        context = {
+            "model": model,
+            "user": current_user.name,
+            "auth_user_obj": current_user
+        }
 
         try:
             resource = toolkit.get_action("resource_show")(context, {"id": self.resource_id})
@@ -58,8 +67,9 @@ class BlobStorageRedirectException(HTTPException):
             href = object_spec["actions"]["download"]["href"]
             return redirect(href)
 
-        except Exception as e:
-            return Response(f"Download failed: {e}", status=500)
+        except Exception:
+            log.exception("Failed to fetch LFS download URL for resource %s", self.resource_id)
+            return Response("Download failed. Please try again later.", status=500)
 
 
 class DummyUploader(object):
@@ -70,8 +80,9 @@ class DummyUploader(object):
     plugin used in CKAN.
 
     CKAN 2.11: If CKAN core's download view is called (due to route conflicts),
-    get_path() raises an exception that triggers a redirect to blob-storage's
-    download endpoint.
+    get_path() raises BlobStorageRedirectException, which fetches the LFS
+    download URL directly from giftless and redirects the user to the storage
+    provider (e.g. Azure), bypassing CKAN routing entirely.
     """
 
     def __init__(self, resource):

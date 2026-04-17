@@ -45,8 +45,9 @@ class TestBlobStorageRedirectException:
     @mock.patch('ckanext.blob_storage.helpers.resource_filename')
     @mock.patch('ckan.plugins.toolkit.get_action')
     @mock.patch('flask.redirect')
+    @mock.patch('flask_login.current_user', name='test-user', new_callable=mock.MagicMock)
     def test_get_response_creates_redirect(
-        self, mock_redirect, mock_get_action, mock_resource_filename,
+        self, mock_current_user, mock_redirect, mock_get_action, mock_resource_filename,
         mock_server_url, mock_get_authz_token, mock_lfs_client_class
     ):
         """get_response() should fetch LFS URL and redirect to blob storage."""
