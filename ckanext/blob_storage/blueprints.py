@@ -11,11 +11,14 @@ blueprint = Blueprint(
 )
 
 
-def download(id, resource_id, filename=None):
+def download(id, resource_id, filename=None, package_type=None):
     """Download resource blueprint
 
     This calls all registered download handlers in order, until
-    a response is returned to the user
+    a response is returned to the user.
+
+    The package_type parameter is captured but not used - it allows this
+    route to handle downloads for any package type (dataset, dataset-2, etc.)
     """
     context = get_context()
     activity_id = request.args.get('activity_id')
@@ -48,5 +51,7 @@ def download(id, resource_id, filename=None):
         return toolkit.abort(401, toolkit._('Not authorized to read resource {0}'.format(resource_id)))
 
 
-blueprint.add_url_rule(u'/dataset/<id>/resource/<resource_id>/download', view_func=download)
-blueprint.add_url_rule(u'/dataset/<id>/resource/<resource_id>/download/<filename>', view_func=download)
+# Routes for any package type (dataset, dataset-2, etc.)
+# strict_slashes=False allows matching with or without trailing slash
+blueprint.add_url_rule(u'/<package_type>/<id>/resource/<resource_id>/download', view_func=download, strict_slashes=False)
+blueprint.add_url_rule(u'/<package_type>/<id>/resource/<resource_id>/download/<filename>', view_func=download)

@@ -1,7 +1,7 @@
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 
-from ckanext.authz_service.authzzie import Authzzie
+from ckanext.authz_service.authzzie import Authzzie  # noqa: F401
 from ckanext.authz_service.interfaces import IAuthorizationBindings
 
 from . import actions, authz, helpers, validators
@@ -102,6 +102,7 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
             u'upload_has_lfs_prefix': validators.upload_has_lfs_prefix,
             u'valid_sha256': validators.valid_sha256,
             u'valid_lfs_prefix': validators.valid_lfs_prefix,
+            u'is_positive_integer': validators.is_positive_integer,
         }
 
     # IConfigurer

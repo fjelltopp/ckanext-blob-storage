@@ -2,7 +2,7 @@ from ckan.plugins.toolkit import Invalid
 
 
 def upload_has_sha256(key, flattened_data, errors, context):
-    if flattened_data[key] == 'upload':
+    if flattened_data.get(key) == 'upload':
         if (key[0], key[1], 'sha256') not in flattened_data:
             raise Invalid("Resource's sha256 field cannot be missing for uploads.")
 
@@ -14,13 +14,13 @@ def valid_sha256(value):
 
 
 def upload_has_size(key, flattened_data, errors, context):
-    if flattened_data[key] == 'upload':
+    if flattened_data.get(key) == 'upload':
         if (key[0], key[1], 'size') not in flattened_data:
             raise Invalid("Resource's size field cannot be missing for uploads.")
 
 
 def upload_has_lfs_prefix(key, flattened_data, errors, context):
-    if flattened_data[key] == 'upload':
+    if flattened_data.get(key) == 'upload':
         if (key[0], key[1], 'lfs_prefix') not in flattened_data:
             raise Invalid("Resource's lfs_prefix field cannot be missing for uploads.")
 
@@ -29,6 +29,17 @@ def valid_lfs_prefix(value):
     if value == "":
         raise Invalid("Resource's lfs_prefix field cannot be empty.")
     return value
+
+
+def is_positive_integer(value):
+    """Validate that value is a positive integer (> 0)."""
+    try:
+        int_value = int(value)
+        if int_value <= 0:
+            raise Invalid("Value must be a positive integer")
+        return int_value
+    except (ValueError, TypeError):
+        raise Invalid("Value must be a positive integer")
 
 
 def _is_hex_str(value, chars=40):

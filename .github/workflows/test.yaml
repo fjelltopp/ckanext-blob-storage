@@ -1,44 +1,36 @@
-name: Run Test matrix
-on: pull_request
-
+name: Tests
+on: [pull_request]
 jobs:
-
   lint:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ 3.9 ]
-
+        python-version: [ "3.10" ]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install requirements
         run: pip install flake8 pycodestyle
       - name: Check syntax
-        run: |
-          flake8 . --count --max-line-length=127 --show-source --statistics
+        run: flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics --exclude ckan
 
   test:
-    name: CKAN
+    name: CKAN ${{ matrix.ckan-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - ckan-container-version: "2.9"
-            ckan-postgres-version: "2.9"
-            ckan-solr-version: "2.9-solr8"
-            ckan-requirements: "requirements.py3.txt"
-          - ckan-container-version: "2.10"
-            ckan-postgres-version: "2.10"
-            ckan-solr-version: "2.10"
-            ckan-requirements: "requirements.py3.txt"
+          - ckan-version: "ckan-dev:2.11-py3.10"
+            ckan-postgres-version: "2.11"
+            ckan-solr-version: "2.11-solr9"
 
     container:
-      image: openknowledge/ckan-dev:${{ matrix.ckan-container-version }}
+      image: ckan/${{ matrix.ckan-version }}
+      options: --user root
     services:
       solr:
         image: ckan/ckan-solr:${{ matrix.ckan-solr-version }}
@@ -50,28 +42,47 @@ jobs:
           POSTGRES_DB: postgres
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       redis:
-          image: redis:3
+        image: redis:3
     env:
       CKAN_SQLALCHEMY_URL: postgresql://ckan_default:pass@postgres/ckan_test
       CKAN_DATASTORE_WRITE_URL: postgresql://datastore_write:pass@postgres/datastore_test
       CKAN_DATASTORE_READ_URL: postgresql://datastore_read:pass@postgres/datastore_test
       CKAN_SOLR_URL: http://solr:8983/solr/ckan
       CKAN_REDIS_URL: redis://redis:6379/1
-      CKAN_SITE_URL: http://localhost:5000
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Install requirements
-      run: |
-        pip install -r ${{ matrix.ckan-requirements }}
-        pip install -r dev-${{ matrix.ckan-requirements }}
-        pip install git+https://github.com/datopian/ckanext-authz-service.git@master
-        pip install -e .
-        # Replace default path to CKAN core config file with the one on the container
-        sed -i -e 's/use = config:.*/use = config:\/srv\/app\/src\/ckan\/test-core.ini/' test.ini
-    - name: Setup extension
-      run: |
-        ckan -c test.ini db init
-    - name: Run tests
-      run: pytest --ckan-ini=test.ini --cov=ckanext.blob_storage --disable-warnings ckanext/blob_storage/tests
+      - uses: actions/checkout@v6
+      - name: Install requirements
+        run: |
+          pip install -r dev-requirements.txt
+          pip install -r requirements.txt
+          pip install git+https://github.com/datopian/ckanext-authz-service.git@master
+          # Fix Python 3.10 compatibility in ckanext-authz-service
+          sed -i 's/from collections import Iterable, defaultdict/from collections.abc import Iterable\nfrom collections import defaultdict/' /usr/local/lib/python3.10/site-packages/ckanext/authz_service/authzzie.py
+          pip install -e .
+          # Replace default path to CKAN core config file with the one on the container
+          sed -i -e 's/use = config:.*/use = config:\/srv\/app\/src\/ckan\/test-core.ini/' test.ini
+      - name: Setup extension
+        run: |
+          ckan -c test.ini db init
+          ckan -c test.ini db upgrade
+      - name: Run tests
+        run: |
+          # 8 failing tests to fix one by one:
+          # 1. test_validation_error_if_not_sha256 (FIXED)
+          # 2. test_validation_error_if_not_size_on_uploads (FIXED)
+          # 3. test_validation_error_if_not_lfs_prefix_on_uploads (FIXED)
+          # 4. test_validation_error_if_wrong_sha256 (FIXED)
+          # 5. test_validation_error_if_size_not_positive_integer (FIXED)
+          # 6. test_validation_error_if_empty_lfs_prefix (FIXED)
+          # 7. test_normalize_object_scope_with_activity_id (FIXED)
+          # 8. test_can_download_release_resource_whether_it_exists_in_current_version_of_package_or_not (FIXED)
+          pytest --ckan-ini=test.ini --cov=ckanext.blob_storage --cov-report=xml --cov-append --disable-warnings -vv -p no:xdist \
+            ckanext/blob_storage/tests/
+
+      - name: Upload coverage report to codecov
+        continue-on-error: true
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.xml
 

@@ -1,13 +1,13 @@
 """Template helpers for ckanext-blob-storage
 """
 from os import path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional  # noqa: F401
 
 import ckan.plugins.toolkit as toolkit
 from six.moves.urllib.parse import urlparse
 
 
-from ckanext.authz_service.authz_binding.common import OptionalCkanContext, get_user_context
+from ckanext.authz_service.authz_binding.common import OptionalCkanContext, get_user_context  # noqa: F401
 
 SERVER_URL_CONF_KEY = 'ckanext.blob_storage.storage_service_url'
 STORAGE_NAMESPACE_CONF_KEY = 'ckanext.blob_storage.storage_namespace'
@@ -151,6 +151,3 @@ def find_activity_package(context, activity_id, resource_id, dataset_id):
         pass
 
     return None
-
-
-

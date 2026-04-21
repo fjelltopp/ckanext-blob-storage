@@ -5,16 +5,16 @@ import shutil
 import tempfile
 import time
 from contextlib import contextmanager
-from typing import Any, Dict, Generator, Tuple
+from typing import Any, Dict, Generator, Tuple  # noqa: F401
 
 import requests
 from ckan.lib.cli import CkanCommand
 from ckan.lib.helpers import _get_auto_flask_context  # noqa  we need this for Flask request context
 from ckan.model import Resource, Session, User
 from ckan.plugins import toolkit
-from flask import Response
+from flask import Response  # noqa: F401
 from giftless_client import LfsClient
-from giftless_client.types import ObjectAttributes
+from giftless_client.types import ObjectAttributes  # noqa: F401
 from six import binary_type, string_types
 from sqlalchemy.orm import load_only
 from sqlalchemy.orm.attributes import flag_modified
