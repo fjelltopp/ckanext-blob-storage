@@ -1,17 +1,13 @@
 import mock
 import pytest
+from ckan import model
 from ckan.plugins import toolkit
 from ckan.tests import factories
+from werkzeug.exceptions import NotFound
+
+from ckanext.blob_storage import blueprints
 
 
-# In CKAN 2.11+, the core /dataset/.../download route takes precedence over
-# blob_storage's /<package_type>/.../download route due to Flask preferring
-# literal path segments over variables. The blob_storage download functionality
-# is instead provided via DummyUploader.get_path() raising BlobStorageRedirectException.
-@pytest.mark.skipif(
-    toolkit.check_ckan_version(min_version='2.11'),
-    reason="CKAN 2.11+ uses uploader mechanism instead of blob_storage route for /dataset/ URLs"
-)
 @pytest.mark.usefixtures('clean_db')
 def test_preview_arg(app):
 
@@ -75,3 +71,16 @@ def test_preview_arg(app):
         args = m.call_args
 
         assert args[0][3] is False                   # inline
+
+
+@pytest.mark.usefixtures('with_plugins')
+def test_download_returns_404_when_activity_does_not_contain_resource(app):
+    """If the requested activity has no such resource, the view answers 404."""
+    url = '/dataset/ds/resource/res/download?activity_id=act'
+
+    with app.flask_app.test_request_context(url), \
+            mock.patch.object(blueprints, 'get_context', return_value={'model': model, 'user': ''}), \
+            mock.patch.object(blueprints, 'find_activity_package', return_value=None), \
+            mock.patch.object(blueprints, 'find_activity_resource', return_value=None):
+        with pytest.raises(NotFound):
+            blueprints.download('ds', 'res')

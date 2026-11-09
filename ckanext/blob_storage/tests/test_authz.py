@@ -1,4 +1,5 @@
 import pytest
+from unittest import mock
 from ckan.plugins import toolkit
 from ckan.tests import factories, helpers
 
@@ -109,3 +110,17 @@ def test_normalize_object_scope_with_activity_id():
         normalized_scope = authz.normalize_object_scope(None, scope)
 
     assert expected_scope == str(normalized_scope)
+
+
+def test_get_resource_storage_id_raises_not_found_for_unknown_resource():
+    """Asking for a resource the dataset doesn't contain is an ObjectNotFound error."""
+    dataset = {'name': 'ds', 'resources': [{'id': 'some-other-resource'}]}
+    get_action = mock.Mock(return_value=mock.Mock(return_value=dataset))
+
+    with mock.patch.object(authz, 'get_user_context', return_value={}), \
+            mock.patch.object(authz.toolkit, 'get_action', get_action):
+        with pytest.raises(toolkit.ObjectNotFound):
+            authz._get_resource_storage_id(
+                organization_id='org', dataset_id='ds',
+                resource_id='missing-resource', activity_id=None,
+            )

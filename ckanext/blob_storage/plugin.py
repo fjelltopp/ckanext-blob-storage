@@ -5,7 +5,7 @@ from ckanext.authz_service.authzzie import Authzzie  # noqa: F401
 from ckanext.authz_service.interfaces import IAuthorizationBindings
 
 from . import actions, authz, helpers, validators
-from .blueprints import blueprint
+from .blueprints import get_package_types, make_blueprint
 from .download_handler import download_handler
 from .interfaces import IResourceDownloadHandler
 from .uploader import DummyUploader
@@ -124,7 +124,7 @@ class BlobStoragePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
     # IBlueprint
 
     def get_blueprint(self):
-        return blueprint
+        return make_blueprint(get_package_types())
 
     # IActions
 

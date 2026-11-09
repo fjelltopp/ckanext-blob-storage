@@ -25,7 +25,7 @@ def call_pre_download_handlers(resource, package, activity_id=None):
     for plugin in plugins.PluginImplementations(IResourceDownloadHandler):
         if not hasattr(plugin, 'pre_resource_download'):
             continue
-        new_resource = plugin.pre_resource_download(resource, package, activity_id=None)
+        new_resource = plugin.pre_resource_download(resource, package, activity_id=activity_id)
         if new_resource:
             resource = new_resource
 
